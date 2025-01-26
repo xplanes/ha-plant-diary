@@ -1,0 +1,11 @@
+{
+  "codeowners": ["@xplanes"],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/xplanes/ha-plant-tracker",
+  "domain": "plant_tracker",
+  "iot_class": "calculated",
+  "name": "Plant Tracker",
+  "requirements": [],
+  "version": "1.0.0"
+}
