@@ -34,9 +34,16 @@ class PlantTrackerEntity(RestoreEntity):
     def __init__(self, name: str) -> None:
         """Initialize."""
         self._name = remove_accents(name).lower()
+        self._friendly_name = name
+        self._unique_id = f"plant_tracker_{self._name}"
         self._state = 0
-        self._last_watered = "2023-10-02"
-        self._last_fertilized = "2023-10-02"
+        self._last_watered = "Unknown"
+        self._last_fertilized = "Unknown"
+        self._watering_interval = 14
+        self._watering_postponed = 0
+        self._days_since_watered = 0
+        self._interior = True
+        self._image = "plant_tracker.bambu"
 
     @property
     def name(self) -> str:
@@ -54,7 +61,17 @@ class PlantTrackerEntity(RestoreEntity):
         return {
             "last_watered": self._last_watered,
             "last_fertilized": self._last_fertilized,
+            "watering_interval": self._watering_interval,
+            "watering_postponed": self._watering_postponed,
+            "days_since_watered": self._days_since_watered,
+            "interior": self._interior,
+            "image": self._image,
         }
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID for the entity."""
+        return self._unique_id
 
     async def async_update(self) -> None:
         """Get the latest data."""
@@ -66,5 +83,20 @@ class PlantTrackerEntity(RestoreEntity):
         last_state = await self.async_get_last_state()
         if last_state is not None:
             self._state = last_state.state
-            self._last_watered = last_state.attributes["last_watered"]
-            self._last_fertilized = last_state.attributes["last_fertilized"]
+            self._last_watered = last_state.attributes.get(
+                "last_watered", self._last_watered
+            )
+            self._last_fertilized = last_state.attributes.get(
+                "last_fertilized", self._last_fertilized
+            )
+            self._watering_interval = last_state.attributes.get(
+                "watering_interval", self._watering_interval
+            )
+            self._watering_postponed = last_state.attributes.get(
+                "watering_postponed", self._watering_postponed
+            )
+            self._days_since_watered = last_state.attributes.get(
+                "days_since_watered", self._days_since_watered
+            )
+            self._interior = last_state.attributes.get("interior", self._interior)
+            self._image = last_state.attributes.get("image", self._image)
