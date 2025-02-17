@@ -33,9 +33,9 @@ class PlantTrackerEntity(RestoreEntity):
 
     def __init__(self, name: str) -> None:
         """Initialize."""
-        self._name = remove_accents(name).lower()
-        self._friendly_name = name
-        self._unique_id = f"plant_tracker_{self._name}"
+        self._name = name
+        self._friendly_name = remove_accents(name).lower()
+        self._unique_id = f"plant_tracker_{self._friendly_name}"
         self._state = 0
         self._last_watered = "Unknown"
         self._last_fertilized = "Unknown"
@@ -43,7 +43,7 @@ class PlantTrackerEntity(RestoreEntity):
         self._watering_postponed = 0
         self._days_since_watered = 0
         self._interior = True
-        self._image = "plant_tracker.bambu"
+        self._image = f"plant_tracker.{self._friendly_name.replace(' ', '_')}"
 
     @property
     def name(self) -> str:
