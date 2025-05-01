@@ -6,8 +6,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.event import async_track_time_change
 import unicodedata
 import voluptuous as vol
+
+from homeassistant.util import datetime
 from .const import DOMAIN
 from typing import Any
 
@@ -33,7 +36,36 @@ async def async_setup_platform(
     # Add the entity to hass.data with the correct entity_id
     hass.data[DOMAIN][entity.entity_id] = entity
 
-    async def handle_update_service(call):
+    # Schedule the daily midnight callback
+    async def midnight_callback(now):
+        await entity.async_update_days_since_last_watered()
+
+    async_track_time_change(hass, midnight_callback, hour=0, minute=0, second=0)
+
+    # Manual update the days since last watered
+    async def handle_service_update_days_since_last_watered(call):
+        """Handle the service call to update the entity's attributes."""
+        entity_id = call.data["entity_id"]
+        entity = hass.states.get(entity_id)
+        if entity is None:
+            return
+
+        # Get the entity object
+        entity_obj = hass.data[DOMAIN].get(entity_id)
+        if entity_obj is None:
+            return
+
+        await entity_obj.async_update_days_since_last_watered()
+
+    # Register the service
+    hass.services.async_register(
+        DOMAIN,
+        "update_days_since_watered",
+        handle_service_update_days_since_last_watered,
+    )
+
+    # Register the update service
+    async def handle_service_update_plant(call):
         """Handle the service call to update the entity's attributes."""
         entity_id = call.data["entity_id"]
         entity = hass.states.get(entity_id)
@@ -59,7 +91,7 @@ async def async_setup_platform(
         entity_obj.async_schedule_update_ha_state(True)
 
     # Register the service
-    hass.services.async_register(DOMAIN, "update_plant", handle_update_service)
+    hass.services.async_register(DOMAIN, "update_plant", handle_service_update_plant)
 
 
 class PlantTrackerEntity(RestoreEntity):
@@ -134,3 +166,28 @@ class PlantTrackerEntity(RestoreEntity):
             )
             self._interior = last_state.attributes.get("interior", self._interior)
             self._image = last_state.attributes.get("image", self._image)
+
+    async def async_update_days_since_last_watered(self):
+        """Update the number of days since last watered."""
+        if self._last_watered:
+            try:
+                last_watered_date = datetime.strptime(
+                    self._last_watered, "%Y-%m-%d"
+                ).date()
+                self._days_since_watered = (
+                    datetime.today().date() - last_watered_date
+                ).days
+            except ValueError:
+                # Handle invalid date string
+                self._days_since_watered = 0
+        else:
+            self._days_since_watered = 0
+
+        if self._days_since_watered == 0:
+            self._state = 3
+        elif self._days_since_watered < int(float(self._watering_interval)):
+            self._state = 2
+        else:
+            self._state = 0
+
+        self.async_write_ha_state()

@@ -6,7 +6,6 @@ update_plant:
       name: Entity ID
       description: The id of the entity to update
       required: true
-      example: Workout
       selector:
         entity:
           filter:
@@ -44,3 +43,15 @@ update_plant:
           max: 100
           mode: slider
           step: 1
+update_days_since_watered:
+  name: Update Days Since Watered
+  description: Update the days since the plant was watered
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The id of the entity to update
+      required: true
+      selector:
+        entity:
+          filter:
+            - integration: "plant_tracker"
