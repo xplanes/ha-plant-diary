@@ -5,8 +5,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers import config_validation as cv
 import unicodedata
-
+import voluptuous as vol
+from .const import DOMAIN
 from typing import Any
 
 
@@ -25,7 +27,39 @@ async def async_setup_platform(
 ) -> None:
     """Set up the sensor platform."""
 
-    async_add_entities([PlantTrackerEntity(config["name"])])
+    entity = PlantTrackerEntity(config["name"])
+    async_add_entities([entity])
+
+    # Add the entity to hass.data with the correct entity_id
+    hass.data[DOMAIN][entity.entity_id] = entity
+
+    async def handle_update_service(call):
+        """Handle the service call to update the entity's attributes."""
+        entity_id = call.data["entity_id"]
+        entity = hass.states.get(entity_id)
+        if entity is None:
+            return
+
+        # Get the entity object
+        entity_obj = hass.data[DOMAIN].get(entity_id)
+        if entity_obj is None:
+            return
+
+        # Update the attributes
+        if "last_watered" in call.data:
+            entity_obj._last_watered = call.data["last_watered"]
+        if "last_fertilized" in call.data:
+            entity_obj._last_fertilized = call.data["last_fertilized"]
+        if "watering_interval" in call.data:
+            entity_obj._watering_interval = call.data["watering_interval"]
+        if "watering_postponed" in call.data:
+            entity_obj._watering_postponed = call.data["watering_postponed"]
+
+        # Schedule an update
+        entity_obj.async_schedule_update_ha_state(True)
+
+    # Register the service
+    hass.services.async_register(DOMAIN, "update_plant", handle_update_service)
 
 
 class PlantTrackerEntity(RestoreEntity):

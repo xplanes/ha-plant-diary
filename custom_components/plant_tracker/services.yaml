@@ -1,0 +1,46 @@
+update_plant:
+  name: Update Plant
+  description: Update the plant
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The id of the entity to update
+      required: true
+      example: Workout
+      selector:
+        entity:
+          filter:
+            - integration: "plant_tracker"
+    last_watered:
+      name: Last Watered
+      description: Last time the plant was watered
+      required: false
+      selector:
+        datetime:
+    last_fertilized:
+      name: Last Fertilized
+      description: Last time the plant was fertilized
+      required: false
+      selector:
+        datetime:
+    watering_interval:
+      name: Watering Interval
+      description: The interval between watering
+      required: false
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: slider
+          step: 1
+    watering_postponed:
+      name: Watering Postponed
+      description: The time the watering was postponed
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
+          step: 1

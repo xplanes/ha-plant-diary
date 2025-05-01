@@ -16,4 +16,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Plant Tracker component."""
     component = EntityComponent(_LOGGER, DOMAIN, hass)
     await component.async_setup(config)
+
+    # Initialize the DOMAIN in hass.data
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
     return True
