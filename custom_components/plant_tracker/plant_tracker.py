@@ -174,18 +174,20 @@ class PlantTrackerEntity(RestoreEntity):
                 last_watered_date = datetime.strptime(
                     self._last_watered, "%Y-%m-%d"
                 ).date()
-                self._days_since_watered = (
-                    datetime.today().date() - last_watered_date
-                ).days
+                self._days_since_watered = str(
+                    (datetime.today().date() - last_watered_date).days
+                )
             except ValueError:
                 # Handle invalid date string
-                self._days_since_watered = 0
+                self._days_since_watered = "0"
         else:
-            self._days_since_watered = 0
+            self._days_since_watered = "0"
 
-        if self._days_since_watered == 0:
+        if self._days_since_watered == "0":
             self._state = 3
-        elif self._days_since_watered < int(float(self._watering_interval)):
+        elif float(self._days_since_watered) <= int(self._watering_interval) + int(
+            self._watering_postponed
+        ):
             self._state = 2
         else:
             self._state = 0
