@@ -32,7 +32,6 @@ async def async_setup_platform(
 
     entity = PlantTrackerEntity(config["name"])
     async_add_entities([entity])
-
     # Add the entity to hass.data with the correct entity_id
     hass.data[DOMAIN][entity.entity_id] = entity
 
@@ -42,7 +41,7 @@ async def async_setup_platform(
 
     async_track_time_change(hass, midnight_callback, hour=0, minute=0, second=0)
 
-    # Manual update the days since last watered
+    # update_days_since_watered service
     async def handle_service_update_days_since_last_watered(call):
         """Handle the service call to update the entity's attributes."""
         entity_id = call.data["entity_id"]
@@ -64,7 +63,7 @@ async def async_setup_platform(
         handle_service_update_days_since_last_watered,
     )
 
-    # Register the update service
+    # update_plant service
     async def handle_service_update_plant(call):
         """Handle the service call to update the entity's attributes."""
         entity_id = call.data["entity_id"]
@@ -92,6 +91,21 @@ async def async_setup_platform(
 
     # Register the service
     hass.services.async_register(DOMAIN, "update_plant", handle_service_update_plant)
+
+    # create_plant service
+    async def handle_service_create_plant(call):
+        """Create a new plant tracker entity dynamically."""
+        name = call.data["friendly_name"]
+
+        entity = PlantTrackerEntity(name)
+        entity._last_watered = call.data.get("last_watered", "Unknown")
+        entity._last_fertilized = call.data.get("last_fertilized", "Unknown")
+        entity._watering_interval = call.data.get("watering_interval", 14)
+        entity._watering_postponed = call.data.get("watering_postponed", 0)
+        async_add_entities([entity])
+        hass.data[DOMAIN][entity.entity_id] = entity
+
+    hass.services.async_register(DOMAIN, "create_plant", handle_service_create_plant)
 
 
 class PlantTrackerEntity(RestoreEntity):

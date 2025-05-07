@@ -43,6 +43,51 @@ update_plant:
           max: 100
           mode: slider
           step: 1
+create_plant:
+  name: Create Plant
+  description: Create a plant
+  fields:
+    friendly_name:
+      name: Name
+      description: The name of the plant
+      required: true
+      example: "My Plant"
+      selector:
+        text:
+          max_length: 100
+    last_watered:
+      name: Last Watered
+      description: Last time the plant was watered
+      required: false
+      selector:
+        datetime:
+    last_fertilized:
+      name: Last Fertilized
+      description: Last time the plant was fertilized
+      required: false
+      selector:
+        datetime:
+    watering_interval:
+      name: Watering Interval
+      description: The interval between watering
+      required: false
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: slider
+          step: 1
+    watering_postponed:
+      name: Watering Postponed
+      description: The time the watering was postponed
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
+          step: 1
 update_days_since_watered:
   name: Update Days Since Watered
   description: Update the days since the plant was watered
