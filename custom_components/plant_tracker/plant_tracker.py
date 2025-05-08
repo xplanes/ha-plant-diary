@@ -7,6 +7,7 @@ from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_track_time_change
+from homeassistant.helpers import entity_registry as er
 import unicodedata
 import voluptuous as vol
 
@@ -106,6 +107,28 @@ async def async_setup_platform(
         hass.data[DOMAIN][entity.entity_id] = entity
 
     hass.services.async_register(DOMAIN, "create_plant", handle_service_create_plant)
+
+    # delete_plant service
+    async def handle_service_delete_plant(call):
+        """Delete a plant tracker entity dynamically."""
+        entity_id = call.data["entity_id"]
+        entity = hass.states.get(entity_id)
+        if entity is None:
+            return
+        # Get the entity object
+        entity_obj = hass.data[DOMAIN].get(entity_id)
+        if entity_obj is None:
+            return
+        # Remove the entity from hass.data
+        del hass.data[DOMAIN][entity_id]
+        # Remove the entity from the entity registry
+        entity_registry = er.async_get(hass)
+        entity_registry.async_remove(entity_id)
+        # Remove the entity from the state machine
+        hass.states.async_remove(entity_id)
+
+    # Register the service
+    hass.services.async_register(DOMAIN, "delete_plant", handle_service_delete_plant)
 
 
 class PlantTrackerEntity(RestoreEntity):

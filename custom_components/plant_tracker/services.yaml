@@ -100,3 +100,15 @@ update_days_since_watered:
         entity:
           filter:
             - integration: "plant_tracker"
+delete_plant:
+  name: Delete Plant
+  description: Delete the plant
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The id of the entity to delete
+      required: true
+      selector:
+        entity:
+          filter:
+            - integration: "plant_tracker"
