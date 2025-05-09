@@ -86,6 +86,8 @@ async def async_setup_platform(
             entity_obj._watering_interval = call.data["watering_interval"]
         if "watering_postponed" in call.data:
             entity_obj._watering_postponed = call.data["watering_postponed"]
+        if "interior" in call.data:
+            entity_obj._interior = call.data["interior"]
 
         # Schedule an update
         entity_obj.async_schedule_update_ha_state(True)
@@ -103,6 +105,7 @@ async def async_setup_platform(
         entity._last_fertilized = call.data.get("last_fertilized", "Unknown")
         entity._watering_interval = call.data.get("watering_interval", 14)
         entity._watering_postponed = call.data.get("watering_postponed", 0)
+        entity._interior = call.data.get("interior", False)
         async_add_entities([entity])
         hass.data[DOMAIN][entity.entity_id] = entity
 
