@@ -86,8 +86,8 @@ async def async_setup_platform(
             entity_obj._watering_interval = call.data["watering_interval"]
         if "watering_postponed" in call.data:
             entity_obj._watering_postponed = call.data["watering_postponed"]
-        if "interior" in call.data:
-            entity_obj._interior = call.data["interior"]
+        if "inside" in call.data:
+            entity_obj._inside = call.data["inside"]
 
         # Schedule an update
         entity_obj.async_schedule_update_ha_state(True)
@@ -105,7 +105,7 @@ async def async_setup_platform(
         entity._last_fertilized = call.data.get("last_fertilized", "Unknown")
         entity._watering_interval = call.data.get("watering_interval", 14)
         entity._watering_postponed = call.data.get("watering_postponed", 0)
-        entity._interior = call.data.get("interior", False)
+        entity._inside = call.data.get("inside", False)
         async_add_entities([entity])
         hass.data[DOMAIN][entity.entity_id] = entity
 
@@ -148,7 +148,7 @@ class PlantTrackerEntity(RestoreEntity):
         self._watering_interval = 14
         self._watering_postponed = 0
         self._days_since_watered = 0
-        self._interior = True
+        self._inside = True
         self._image = f"plant_tracker.{self._friendly_name.replace(' ', '_')}"
 
     @property
@@ -170,7 +170,7 @@ class PlantTrackerEntity(RestoreEntity):
             "watering_interval": self._watering_interval,
             "watering_postponed": self._watering_postponed,
             "days_since_watered": self._days_since_watered,
-            "interior": self._interior,
+            "inside": self._inside,
             "image": self._image,
         }
 
@@ -204,7 +204,7 @@ class PlantTrackerEntity(RestoreEntity):
             self._days_since_watered = last_state.attributes.get(
                 "days_since_watered", self._days_since_watered
             )
-            self._interior = last_state.attributes.get("interior", self._interior)
+            self._inside = last_state.attributes.get("inside", self._inside)
             self._image = last_state.attributes.get("image", self._image)
 
     async def async_update_days_since_last_watered(self):
