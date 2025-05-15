@@ -2,52 +2,47 @@
 
 import logging
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_component import EntityComponent
 from homeassistant.helpers.typing import ConfigType
-import homeassistant.helpers.entity_registry as er
 
-from .const import DOMAIN
+from .const import DOMAIN, PLANT_TRACKER_MANAGER
+from .PlantTrackerManager import PlantTrackerManager
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Plant Tracker component.
+    """Set up the integration from configuration.yaml (not used)."""
+    return True
 
-    Args:
-        hass (HomeAssistant): The Home Assistant instance.
-        config (ConfigType): The configuration dictionary.
 
-    Returns:
-        bool: True if the setup was successful, False otherwise.
-    """
-    entity_registry = er.async_get(hass)
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Set up the integration from a config entry."""
 
-    # Filtrar entidades con dominio plant_tracker
-    plant_entities = [
-        entry.original_name
-        for entry in entity_registry.entities.values()
-        if entry.domain == DOMAIN
-    ]
-
-    # Si no hay entidades, no se configura el componente
-    if not plant_entities:
-        _LOGGER.warning("No plant entities found in the entity registry")
-        return False
-
-    # Configurar el componente con las entidades encontradas
-    config[DOMAIN] = [
-        {"platform": DOMAIN, "name": plant_name} for plant_name in plant_entities
-    ]
-
-    # Set up the Plant Tracker component.
-    component = EntityComponent(_LOGGER, DOMAIN, hass)
-    await component.async_setup(config)
-
-    # Initialize the DOMAIN in hass.data
+    # Initialize the DOMAIN in hass.data if it doesn't exist
     if DOMAIN not in hass.data:
         hass.data[DOMAIN] = {}
 
+    # Initialize the PlantTrackerManager and store it in hass.data
+    # with the entry ID as the key
+    manager = PlantTrackerManager(hass, entry)
+    await manager.async_init()
+
+    hass.data[DOMAIN][PLANT_TRACKER_MANAGER] = manager
+
+    # Set up the sensor platform
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    )
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry"""
+
+    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, ["sensor"])
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id)
+    return unload_ok

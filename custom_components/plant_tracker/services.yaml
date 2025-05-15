@@ -47,7 +47,7 @@ create_plant:
   name: Create Plant
   description: Create a plant
   fields:
-    friendly_name:
+    plant_name:
       name: Name
       description: The name of the plant
       required: true
