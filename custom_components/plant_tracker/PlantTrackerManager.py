@@ -4,7 +4,9 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers import entity_registry as er
 from functools import partial
+from typing import Optional
 from .PlantTrackerEntity import PlantTrackerEntity
 from .const import DOMAIN
 
@@ -26,22 +28,8 @@ class PlantTrackerManager:
         self._async_add_entities = async_add_entities
         plants_data = self.entry.data.get("plants", {})
 
-        entities = {}
         for plant_id, plant_data in plants_data.items():
-            entity = PlantTrackerEntity(plant_id, plant_data, self.entry)
-            entities[plant_id] = entity
-
-            remove_listener = async_track_time_change(
-                self.hass,
-                partial(self._update_entity_midnight, entity),
-                hour=0,
-                minute=0,
-                second=0,
-            )
-            self._listeners[plant_id] = remove_listener
-
-        self.entities = entities
-        async_add_entities(list(entities.values()))
+            await self._add_plant_entity(plant_id, plant_data, save_to_config=False)
 
     async def async_register_services(self):
         hass = self.hass
@@ -80,29 +68,7 @@ class PlantTrackerManager:
             "inside": data.get("inside", True),
             "image": data.get("image", f"plant_tracker.{plant_id}"),
         }
-
-        entity = PlantTrackerEntity(plant_id, plant_data, self.entry)
-        self.entities[plant_id] = entity
-
-        if self._async_add_entities:
-            self._async_add_entities([entity])
-
-        # Registrar actualización diaria
-        async def midnight_callback(now):
-            await entity.async_update_days_since_last_watered()
-
-        async_track_time_change(
-            self.hass, midnight_callback, hour=0, minute=0, second=0
-        )
-
-        # Update the days since last watered
-        await entity.async_update()
-
-        # Guardar en la entrada de configuración
-        self.update_all_plants(plant_id, entity.extra_state_attributes)
-
-        # Force update the entity state
-        entity.async_schedule_update_ha_state(True)
+        await self._add_plant_entity(plant_id, plant_data, save_to_config=True)
 
     async def update_plant(self, data: dict):
         """Update an existing plant."""
@@ -152,10 +118,16 @@ class PlantTrackerManager:
         # Remove the entity from Home Assistant
         await entity.async_remove()
 
+        # Remove from entity registry (if registered)
+        entity_registry = er.async_get(self.hass)
+        entity_entry = entity_registry.async_get(entity.entity_id)
+        if entity_entry:
+            entity_registry.async_remove(entity_entry.entity_id)
+
         # Remove from the entities dictionary
         del self.entities[plant_id]
 
-    def update_all_plants(self, plant_id: str, plant_data: dict):
+    def update_all_plants(self, plant_id: str, plant_data: Optional[dict]):
         """Update all plants in the config entry."""
         raw_plants = dict(self.entry.data.get("plants", {}))
         if isinstance(raw_plants, dict):
@@ -174,3 +146,30 @@ class PlantTrackerManager:
 
     async def _update_entity_midnight(self, entity: PlantTrackerEntity, now):
         await entity.async_update()
+
+    async def _add_plant_entity(
+        self, plant_id: str, plant_data: dict, save_to_config: bool = False
+    ):
+        """Create and add a PlantTrackerEntity."""
+        entity = PlantTrackerEntity(plant_id, plant_data, self.entry)
+        self.entities[plant_id] = entity
+
+        if self._async_add_entities:
+            self._async_add_entities([entity])
+
+        # Registrar actualización diaria
+        async def midnight_callback(now):
+            await entity.async_update_days_since_last_watered()
+
+        remove_listener = async_track_time_change(
+            self.hass, midnight_callback, hour=0, minute=0, second=0
+        )
+        self._listeners[plant_id] = remove_listener
+
+        # Actualizar estado inicial
+        await entity.async_update()
+        entity.async_schedule_update_ha_state(True)
+
+        # Guardar en la entrada de configuración si corresponde
+        if save_to_config:
+            self.update_all_plants(plant_id, entity.extra_state_attributes)
