@@ -101,14 +101,15 @@ class PlantTrackerManager:
         # Force update the entity state
         entity.async_schedule_update_ha_state(True)
 
-    async def delete_plant(self, plant_id: str):
+    async def delete_plant(self, plant_id: str, update_config_entry: bool = True):
         """Delete a plant tracker entity."""
         entity = self.entities.get(plant_id)
         if not entity:
             return
 
         # Remove from config entry
-        self.update_all_plants(plant_id, None)
+        if update_config_entry:
+            self.update_all_plants(plant_id, None)
 
         # Stop listener if exists
         remove_listener = self._listeners.pop(plant_id, None)
@@ -151,7 +152,7 @@ class PlantTrackerManager:
         self, plant_id: str, plant_data: dict, save_to_config: bool = False
     ):
         """Create and add a PlantTrackerEntity."""
-        entity = PlantTrackerEntity(plant_id, plant_data, self.entry)
+        entity = PlantTrackerEntity(plant_id, plant_data)
         self.entities[plant_id] = entity
 
         if self._async_add_entities:
@@ -173,3 +174,10 @@ class PlantTrackerManager:
         # Guardar en la entrada de configuración si corresponde
         if save_to_config:
             self.update_all_plants(plant_id, entity.extra_state_attributes)
+
+    async def async_unload(self):
+        """Unload the manager and remove all entities."""
+
+        # Unload all entities
+        for plant_id in list(self.entities.keys()):
+            await self.delete_plant(plant_id, update_config_entry=False)

@@ -1,27 +1,16 @@
 """Platform for sensor integration."""
 
-from __future__ import annotations
-
-import unicodedata
 from typing import Any
-
 from homeassistant.components.sensor import SensorEntity
 from datetime import datetime
-
-
-def remove_accents(input_str: str) -> str:
-    """Remove accents from a string."""
-    nfkd_form = unicodedata.normalize("NFKD", input_str)
-    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
 class PlantTrackerEntity(SensorEntity):
     """Representation of a plant tracker sensor."""
 
-    def __init__(self, plant_id: str, data: dict[str, Any], config_entry) -> None:
+    def __init__(self, plant_id: str, data: dict[str, Any]) -> None:
         """Initialize the sensor."""
         self._plant_id = plant_id
-        self._config_entry = config_entry
         self._name = f"plant_tracker_{plant_id}"
         self._unique_id = self._name
 
@@ -33,16 +22,17 @@ class PlantTrackerEntity(SensorEntity):
         self._watering_postponed = data.get("watering_postponed", 0)
         self._days_since_watered = data.get("days_since_watered", 0)
         self._inside = data.get("inside", True)
-        image_name = remove_accents(plant_id).lower().replace(" ", "_")
-        self._image = f"plant_tracker.{image_name}"
+        self._image = plant_id
         self._state = 0
 
     @property
     def name(self) -> str:
+        """Return the name of the sensor."""
         return self._name
 
     @property
-    def unique_id(self) -> str:
+    def unique_id(self) -> str | None:
+        """Return a unique ID for this entity."""
         return self._unique_id
 
     @property
@@ -51,6 +41,7 @@ class PlantTrackerEntity(SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
         return {
             "plant_name": self._plant_name,
             "last_watered": self._last_watered,
