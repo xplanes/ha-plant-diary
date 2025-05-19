@@ -40,6 +40,10 @@ class PlantTrackerEntity(SensorEntity):
         return self._state
 
     @property
+    def icon(self):
+        return "mdi:flower"
+
+    @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return {
