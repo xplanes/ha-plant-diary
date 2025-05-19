@@ -2,14 +2,14 @@ update_plant:
   name: Update Plant
   description: Update the plant
   fields:
-    entity_id:
-      name: Entity ID
-      description: The id of the entity to update
+    plant_id:
+      name: Plant ID
+      description: The id of the plant to update
       required: true
+      example: "My Plant"
       selector:
-        entity:
-          filter:
-            - integration: "plant_tracker"
+        text:
+          max_length: 100
     last_watered:
       name: Last Watered
       description: Last time the plant was watered
@@ -92,23 +92,23 @@ update_days_since_watered:
   name: Update Days Since Watered
   description: Update the days since the plant was watered
   fields:
-    entity_id:
-      name: Entity ID
-      description: The id of the entity to update
+    plant_id:
+      name: Plant ID
+      description: The id of the plant to update
       required: true
+      example: "My Plant"
       selector:
-        entity:
-          filter:
-            - integration: "plant_tracker"
+        text:
+          max_length: 100
 delete_plant:
   name: Delete Plant
   description: Delete the plant
   fields:
-    entity_id:
-      name: Entity ID
-      description: The id of the entity to delete
+    plant_id:
+      name: Plant ID
+      description: The id of the plant to delete
       required: true
+      example: "My Plant"
       selector:
-        entity:
-          filter:
-            - integration: "plant_tracker"
+        text:
+          max_length: 100
