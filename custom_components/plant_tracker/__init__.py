@@ -42,7 +42,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload the plant tracker manager and its entities."""
 
-    manager: PlantTrackerManager = hass.data[DOMAIN][PLANT_TRACKER_MANAGER]
-    await manager.async_unload()
+    # Unload the platforms (e.g., sensor)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
 
-    return True
+    if unload_ok:
+        # Cleanup manager
+        manager: PlantTrackerManager = hass.data[DOMAIN].pop(
+            PLANT_TRACKER_MANAGER, None
+        )
+        if manager:
+            await manager.async_unload()
+
+        # Optionally remove the domain if empty
+        if not hass.data[DOMAIN]:
+            hass.data.pop(DOMAIN)
+
+    return unload_ok
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Handle reloads of the config entry."""
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)
