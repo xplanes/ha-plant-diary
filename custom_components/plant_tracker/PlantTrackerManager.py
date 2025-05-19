@@ -1,5 +1,6 @@
 """Module for managing the Plant Tracker component."""
 
+import logging
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.event import async_track_time_change
@@ -9,6 +10,8 @@ from functools import partial
 from typing import Optional
 from .PlantTrackerEntity import PlantTrackerEntity
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PlantTrackerManager:
@@ -48,6 +51,8 @@ class PlantTrackerManager:
             entity = self.entities.get(plant_id)
             if entity:
                 await entity.async_update_days_since_last_watered()
+            else:
+                _LOGGER.error("Plant with ID %s not found", plant_id)
 
         hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
@@ -75,6 +80,7 @@ class PlantTrackerManager:
         plant_id = data["plant_id"]
         entity = self.entities.get(plant_id)
         if not entity:
+            _LOGGER.error("Plant with ID %s not found", plant_id)
             return
 
         if "last_watered" in data:
@@ -105,6 +111,7 @@ class PlantTrackerManager:
         """Delete a plant tracker entity."""
         entity = self.entities.get(plant_id)
         if not entity:
+            _LOGGER.error("Plant with ID %s not found", plant_id)
             return
 
         # Remove from config entry
