@@ -6,7 +6,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import entity_registry as er
-from functools import partial
 from typing import Optional
 from .PlantTrackerEntity import PlantTrackerEntity
 from .const import DOMAIN
