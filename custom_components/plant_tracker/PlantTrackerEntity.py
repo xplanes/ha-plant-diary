@@ -78,9 +78,11 @@ class PlantTrackerEntity(SensorEntity):
 
         if self._days_since_watered == 0:
             self._state = 3
+        elif self._days_since_watered <= int(self._watering_interval):
+            self._state = 2
         elif self._days_since_watered <= int(self._watering_interval) + int(
             self._watering_postponed
         ):
-            self._state = 2
+            self._state = 1
         else:
             self._state = 0
