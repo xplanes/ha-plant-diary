@@ -293,27 +293,21 @@ class PlantTrackerCard extends HTMLElement {
                     <label for="last_watered">Last Watered:</label>
                     <input type="text" id="last_watered" name="last_watered" value="${attributes.last_watered || 'Unknown'}"><br>
                     <button type="button" id="last_watered_btn">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12,3.25C12,3.25 5.5,11.5 5.5,15.25C5.5,19.42 8.58,22.5 12,22.5C15.42,22.5 18.5,19.42 18.5,15.25C18.5,11.5 12,3.25 12,3.25Z" />
-                        </svg>
+                        <ha-icon icon="mdi:water"></ha-icon>
                     </button>
                 </div>
                 <div class="modal-attribute">
                     <label for="last_fertilized">Last Fertilized:</label>
                     <input type="text" id="last_fertilized" name="last_fertilized" value="${attributes.last_fertilized || 'Unknown'}"><br>
                     <button type="button" id="last_fertilized_btn">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M8.1,13.34L3.91,9.16C2.35,7.59 2.35,5.06 3.91,3.5L10.93,10.5L8.1,13.34M14.88,11.53L13.41,13L20.29,19.88L18.88,21.29L12,14.41L5.12,21.29L3.71,19.88L13.47,10.12C12.76,8.59 13.26,6.44 14.85,4.85C16.76,2.93 19.5,2.57 20.96,4.03C22.43,5.5 22.07,8.24 20.15,10.15C18.56,11.74 16.41,12.24 14.88,11.53Z" />
-                        </svg>
+                        <ha-icon icon="mdi:food-fork-drink"></ha-icon>
                     </button>
                 </div>
                 <div class="modal-attribute">
                     <label for="watering_postponed">Watering Postponed:</label>
                     <input type="text" id="watering_postponed" name="watering_postponed" value="${attributes.watering_postponed || 'Unknown'}"><br>
                     <button type="button" id="watering_postponed_btn">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M23,12H17V10L20.39,6H17V4H23V6L19.62,10H23V12M15,16H9V14L12.39,10H9V8H15V10L11.62,14H15V16M7,20H1V18L4.39,14H1V12H7V14L3.62,18H7V20Z" />
-                        </svg>
+                        <ha-icon icon="mdi:sleep"></ha-icon>
                     </button>
                 </div>
                 <div class="modal-attribute">
@@ -570,9 +564,20 @@ class PlantTrackerCard extends HTMLElement {
                 border: none;
                 cursor: pointer;
             }
-            .modal-attribute button svg {
-                width: 24px;
-                height: 24px;
+            .modal-attribute ha-icon {
+                --mdc-icon-size: 36px;
+                color: var(--primary-color);
+            }
+            .fallback-icon {
+                font-size: 64px;
+                color: #888;
+            }
+            .error-message {
+                color: red;
+                font-weight: bold;
+                display: none;
+                margin-bottom: 10px;
+                text-align: center;
             }
 
             .plant-tracker-entity-modal-content {
@@ -636,21 +641,6 @@ class PlantTrackerCard extends HTMLElement {
             .plant-tracker-entity-modal-content .inside {
                 grid-area: inside;
                 justify-self: center;
-            }
-            ha-icon {
-                --mdc-icon-size: 64px;
-                color: var(--primary-color);
-            }
-            .fallback-icon {
-                font-size: 64px;
-                color: #888;
-            }
-            .error-message {
-                color: red;
-                font-weight: bold;
-                display: none;
-                margin-bottom: 10px;
-                text-align: center;
             }
           </style>`;
     }
