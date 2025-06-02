@@ -21,7 +21,7 @@ class PlantTrackerManager:
         self.entry = entry
         self.entities = {}
         self._async_add_entities = None
-        self._listeners = {}
+        self._midnight_listener = None
 
     async def async_init(self):
         await self.async_register_services()
@@ -46,18 +46,20 @@ class PlantTrackerManager:
             await self.delete_plant(call.data["plant_id"])
 
         async def handle_update_days_since_last_watered(call: ServiceCall):
-            plant_id = call.data["plant_id"]
-            entity = self.entities.get(plant_id)
-            if entity:
-                await entity.async_update_days_since_last_watered()
-            else:
-                _LOGGER.error("Plant with ID %s not found", plant_id)
+            await self._update_all_days_since_last_watered(None)
 
         hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
         hass.services.async_register(DOMAIN, "delete_plant", handle_delete_plant)
         hass.services.async_register(
             DOMAIN, "update_days_since_watered", handle_update_days_since_last_watered
+        )
+        self._midnight_listener = async_track_time_change(
+            self.hass,
+            self._update_all_days_since_last_watered,
+            hour=0,
+            minute=0,
+            second=0,
         )
 
     async def create_plant(self, data: dict):
@@ -117,11 +119,6 @@ class PlantTrackerManager:
         if update_config_entry:
             self.update_all_plants(plant_id, None)
 
-        # Stop listener if exists
-        remove_listener = self._listeners.pop(plant_id, None)
-        if remove_listener:
-            remove_listener()
-
         # Remove the entity from Home Assistant
         await entity.async_remove()
 
@@ -151,9 +148,6 @@ class PlantTrackerManager:
             self.entry, data={"plants": all_plants}
         )
 
-    async def _update_entity_midnight(self, entity: PlantTrackerEntity, now):
-        await entity.async_update()
-
     async def _add_plant_entity(
         self, plant_id: str, plant_data: dict, save_to_config: bool = False
     ):
@@ -164,15 +158,6 @@ class PlantTrackerManager:
         if self._async_add_entities:
             self._async_add_entities([entity])
 
-        # Registrar actualización diaria
-        async def midnight_callback(now):
-            await entity.async_update_days_since_last_watered()
-
-        remove_listener = async_track_time_change(
-            self.hass, midnight_callback, hour=0, minute=0, second=0
-        )
-        self._listeners[plant_id] = remove_listener
-
         # Actualizar estado inicial
         await entity.async_update()
         entity.async_schedule_update_ha_state(True)
@@ -181,9 +166,21 @@ class PlantTrackerManager:
         if save_to_config:
             self.update_all_plants(plant_id, entity.extra_state_attributes)
 
+    async def _update_all_days_since_last_watered(self, now):
+        _LOGGER.debug("update for all plants")
+        for entity in self.entities.values():
+            try:
+                await entity.async_update_days_since_last_watered()
+            except Exception as e:
+                _LOGGER.error("Update failed for entity %s: %s", entity.entity_id, e)
+
     async def async_unload(self):
         """Unload the manager and remove all entities."""
 
         # Unload all entities
         for plant_id in list(self.entities.keys()):
             await self.delete_plant(plant_id, update_config_entry=False)
+
+        if self._midnight_listener:
+            self._midnight_listener()
+            self._midnight_listener = None

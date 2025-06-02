@@ -38,6 +38,9 @@ class PlantTrackerCard extends HTMLElement {
             this.addPlantButton.onclick = () => {
                 this.showPlantEditModal("");
             };
+
+            // Call the service to update the days since watered
+            this._hass.callService('plant_tracker', 'update_days_since_watered');
         }
 
         // Set the inner HTML of the content div to the generated HTML
@@ -570,6 +573,7 @@ class PlantTrackerCard extends HTMLElement {
             }
             .fallback-icon {
                 font-size: 64px;
+                --mdc-icon-size: 64px;
                 color: #888;
             }
             .error-message {

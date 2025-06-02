@@ -91,15 +91,6 @@ create_plant:
 update_days_since_watered:
   name: Update Days Since Watered
   description: Update the days since the plant was watered
-  fields:
-    plant_id:
-      name: Plant ID
-      description: The id of the plant to update
-      required: true
-      example: "My Plant"
-      selector:
-        text:
-          max_length: 100
 delete_plant:
   name: Delete Plant
   description: Delete the plant
