@@ -21,6 +21,10 @@ class PlantTrackerCard extends HTMLElement {
                 `   <div class="card-actions">
                         <mwc-button id="addPlantButton" label="Add Plant"></mwc-button>
                     </div>
+                    <div class="filter-toggle">
+                        <label for="toggleShowDue">Show only plants that need watering</label>
+                        <ha-switch id="toggleShowDue"></ha-switch>
+                    </div>
                     <div id="plantsOutside" class="card-content"></div>
                     <div id="plantsInside" class="card-content"></div>
                     <div id="modalEditPlant" class="modal">
@@ -33,6 +37,10 @@ class PlantTrackerCard extends HTMLElement {
             this.contentPlantsInside = this.querySelector('#plantsInside');
             this.modalEditPlant = this.querySelector('#modalEditPlant');
             this.modalEditPlantBody = this.querySelector('#modalEditPlantBody');
+            this.querySelector('#toggleShowDue').addEventListener('change', () => {
+                this.contentPlantsOutside.innerHTML = this.generatePlantCardContentHTML(false);
+                this.contentPlantsInside.innerHTML = this.generatePlantCardContentHTML(true);
+            });
 
             // Add event listener to the add plant button
             this.addPlantButton.onclick = () => {
@@ -350,6 +358,8 @@ class PlantTrackerCard extends HTMLElement {
         } else {
             htmlContent += `<ha-markdown-element><h1>Outdoor Plants</h1></ha-markdown-element>`;
         }
+
+        const showOnlyDue = this.querySelector('#toggleShowDue')?.checked;
         for (const entityId in this._hass.states) {
             // Check if the entity ID starts with 'plant_tracker.'
             if (entityId.startsWith('sensor.plant_tracker')) {
@@ -358,6 +368,12 @@ class PlantTrackerCard extends HTMLElement {
                 const attributes = state ? state.attributes : {};
 
                 if (isInside === attributes.inside) {
+
+                    // Check if the plant needs watering
+                    const interval = parseFloat(attributes.watering_interval) || 0;
+                    const days = parseFloat(attributes.days_since_watered) || 0;
+                    const isDue = days >= interval;
+                    if (showOnlyDue && !isDue) continue;
 
                     const backgroundColor = this.getBackgroundColor(stateStr);
 
@@ -395,6 +411,13 @@ class PlantTrackerCard extends HTMLElement {
                 justify-content: flex-end;
                 margin: 4px;
                 margin-bottom: 12px;
+            }
+            .filter-toggle {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 10px;
+                margin: 0 10px 10px 10px;
             }
             .card-content {
                 flex: 1;
