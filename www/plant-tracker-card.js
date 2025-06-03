@@ -38,12 +38,14 @@ class PlantTrackerCard extends HTMLElement {
             this.modalEditPlant = this.querySelector('#modalEditPlant');
             this.modalEditPlantBody = this.querySelector('#modalEditPlantBody');
             this.querySelector('#toggleShowDue').addEventListener('change', () => {
+                this._fireEvent('haptic', 'light');
                 this.contentPlantsOutside.innerHTML = this.generatePlantCardContentHTML(false);
                 this.contentPlantsInside.innerHTML = this.generatePlantCardContentHTML(true);
             });
 
             // Add event listener to the add plant button
             this.addPlantButton.onclick = () => {
+                this._fireEvent('haptic', 'light');
                 this.showPlantEditModal("");
             };
 
@@ -54,6 +56,16 @@ class PlantTrackerCard extends HTMLElement {
         // Set the inner HTML of the content div to the generated HTML
         this.contentPlantsOutside.innerHTML = this.generatePlantCardContentHTML(false);
         this.contentPlantsInside.innerHTML = this.generatePlantCardContentHTML(true);
+
+        // Add event listener to the plant card
+        this.querySelectorAll('.plant-tracker-entity').forEach((el) => {
+            el.addEventListener('click', (event) => {
+                this._fireEvent('haptic', 'light');
+                const entityId = el.dataset.entityId;
+                this.showPlantEditModal(entityId);
+            });
+        });
+
 
         // Show modal for adding or editing a plant
         this.showPlantEditModal = (entityId) => {
@@ -76,6 +88,8 @@ class PlantTrackerCard extends HTMLElement {
                 // On OK call create_plant
                 const okButton = this.modalEditPlantBody.querySelector('#ok_button');
                 okButton.onclick = () => {
+                    this._fireEvent('haptic', 'light');
+
                     const plantNameInput = this.modalEditPlantBody.querySelector('#plant_name').value;
                     const normalizedNewName = this.normalizeName(plantNameInput);
 
@@ -118,12 +132,15 @@ class PlantTrackerCard extends HTMLElement {
                 // On OK call updateAttributes
                 const okButton = this.modalEditPlantBody.querySelector('#ok_button');
                 okButton.onclick = () => {
+                    this._fireEvent('haptic', 'light');
                     this.updateAttributes(entityId);
                 };
 
                 // Add event listeners to the delete button
                 const deleteButton = this.modalEditPlantBody.querySelector('.deletePlantButton');
                 deleteButton.onclick = () => {
+                    this._fireEvent('haptic', 'light');
+
                     const name = attributes.plant_name || 'Unknown';
                     if (confirm(`Are you sure you want to delete ${name}?`)) {
                         this._hass.callService('plant_tracker', 'delete_plant', {
@@ -137,22 +154,33 @@ class PlantTrackerCard extends HTMLElement {
             // Close the modal when the user clicks on <span> (x)
             const modalEditPlantCloseButton = this.modalEditPlantBody.querySelector('#EditPlantClose');
             modalEditPlantCloseButton.onclick = () => {
+                this._fireEvent('haptic', 'light');
                 this.modalEditPlant.style.display = "none";
             };
 
             // On Cancel close the modal
             const cancelButton = this.modalEditPlantBody.querySelector('#cancel_button');
             cancelButton.onclick = () => {
+                this._fireEvent('haptic', 'light');
                 this.modalEditPlant.style.display = "none";
             };
 
             // Update attributes
             this.modalEditPlantBody.querySelector('#last_watered_btn')
-                .addEventListener('click', () => this.modalEditPlantBody.querySelector('#last_watered').value = this.getTodayDate());
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#last_watered').value = this.getTodayDate();
+                });
             this.modalEditPlantBody.querySelector('#last_fertilized_btn')
-                .addEventListener('click', () => this.modalEditPlantBody.querySelector('#last_fertilized').value = this.getTodayDate());
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#last_fertilized').value = this.getTodayDate();
+                });
             this.modalEditPlantBody.querySelector('#watering_postponed_btn')
-                .addEventListener('click', () => this.modalEditPlantBody.querySelector('#watering_postponed').value++);
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#watering_postponed').value++;
+                });
 
             this.modalEditPlant.style.display = "block";
         };
@@ -241,6 +269,17 @@ class PlantTrackerCard extends HTMLElement {
             .replace(/[\u0300-\u036f]/g, "") // elimina los acentos
             .replace(/\s+/g, " ")           // quita espacios múltiples
             .trim();
+    }
+
+    // Function to fire an event
+    _fireEvent(type, detail, options = {}) {
+        const event = new Event(type, {
+            bubbles: options.bubbles ?? true,
+            cancelable: Boolean(options.cancelable),
+            composed: options.composed ?? true,
+        });
+        event.detail = detail ?? {};
+        this.dispatchEvent(event);
     }
 
     // Function to generate the plant image container HTML
@@ -380,7 +419,7 @@ class PlantTrackerCard extends HTMLElement {
                     // Create the HTML content for each entity
                     // Use the entity ID as the key to access the state and attributes
                     htmlContent += `
-                        <div class="plant-tracker-entity" style="background-color: ${backgroundColor};" onclick="showPlantEditModal('${entityId}')">
+                        <div class="plant-tracker-entity" style="background-color: ${backgroundColor};" data-entity-id="${entityId}">
                     `;
                     htmlContent += this.generatePlantImageContainerHTML(entityId);
                     htmlContent += `
