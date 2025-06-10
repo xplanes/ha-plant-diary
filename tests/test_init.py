@@ -1,9 +1,31 @@
-"""Test component setup."""
-from homeassistant.setup import async_setup_component
+"""Tests for Plant Tracker integration."""
 
-from custom_components.plant_tracker.const import DOMAIN
+import pytest
+from custom_components.plant_tracker import config_flow
+from unittest import mock
+
+DEFAULT_NAME = "My Plant Tracker"
 
 
-async def test_async_setup(hass):
-    """Test the component gets setup."""
-    assert await async_setup_component(hass, DOMAIN, {}) is True
+@pytest.mark.asyncio
+async def test_flow_user_init(hass):
+    """Test the initialization of the form in the first step of the config flow."""
+    result = await hass.config_entries.flow.async_init(
+        config_flow.DOMAIN, context={"source": "user"}
+    )
+    expected = {
+        "context": {"source": "user"},
+        "data": {},
+        "description": None,
+        "flow_id": mock.ANY,
+        "minor_version": 1,
+        "options": {},
+        "result": mock.ANY,
+        "subentries": (),
+        "title": "Plant Tracker",
+        "type": mock.ANY,
+        "version": 1,
+        "description_placeholders": None,
+        "handler": "plant_tracker",
+    }
+    assert expected == result

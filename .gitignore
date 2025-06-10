@@ -1,0 +1,19 @@
+# pytest
+.pytest_cache
+.cache
+
+
+# GITHUB Proposed Python stuff:
+*.py[cod]
+__pycache__
+
+
+# Unit test / coverage reports
+.coverage
+coverage.xml
+nosetests.xml
+htmlcov/
+test-reports/
+test-results.xml
+test-output.xml
+pytest-*.txt
