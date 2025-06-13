@@ -63,18 +63,14 @@ class PlantTrackerEntity(SensorEntity):
 
     async def async_update_days_since_last_watered(self):
         """Calculate and update days since last watered."""
-        if self._last_watered:
-            try:
-                last_watered_date = datetime.strptime(
-                    self._last_watered, "%Y-%m-%d"
-                ).date()
-                self._days_since_watered = (
-                    datetime.today().date() - last_watered_date
-                ).days
-            except ValueError:
-                self._days_since_watered = 0
-        else:
-            self._days_since_watered = 0
+        try:
+            last_watered_date = datetime.strptime(self._last_watered, "%Y-%m-%d").date()
+            self._days_since_watered = (
+                datetime.today().date() - last_watered_date
+            ).days
+        except ValueError:
+            self._state = 0
+            return
 
         if self._days_since_watered == 0:
             self._state = 3

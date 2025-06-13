@@ -8,7 +8,7 @@ DEFAULT_NAME = "My Plant Tracker"
 
 
 @pytest.mark.asyncio
-async def test_flow_user_init(hass):
+async def test_flow_user_init(hass) -> None:
     """Test the initialization of the form in the first step of the config flow."""
     result = await hass.config_entries.flow.async_init(
         config_flow.DOMAIN, context={"source": "user"}
