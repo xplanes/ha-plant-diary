@@ -134,10 +134,9 @@ class PlantTrackerManager:
     def update_all_plants(self, plant_id: str, plant_data: Optional[dict]):
         """Update all plants in the config entry."""
         raw_plants = dict(self.entry.data.get("plants", {}))
+        all_plants = {}
         if isinstance(raw_plants, dict):
             all_plants = dict(raw_plants)
-        else:
-            all_plants = {}
 
         if plant_data is None:
             del all_plants[plant_id]
@@ -169,10 +168,7 @@ class PlantTrackerManager:
     async def _update_all_days_since_last_watered(self, now):
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
-            try:
-                await entity.async_update_days_since_last_watered()
-            except Exception as e:
-                _LOGGER.error("Update failed for entity %s: %s", entity.entity_id, e)
+            await entity.async_update_days_since_last_watered()
 
     async def async_unload(self):
         """Unload the manager and remove all entities."""
@@ -184,3 +180,6 @@ class PlantTrackerManager:
         if self._midnight_listener:
             self._midnight_listener()
             self._midnight_listener = None
+
+        if self._async_add_entities:
+            self._async_add_entities = None

@@ -1,4 +1,5 @@
-import asyncio
+# Test cases for PlantTrackerEntity class in the Plant Tracker custom component for Home Assistant
+import pytest
 from custom_components.plant_tracker.PlantTrackerEntity import PlantTrackerEntity
 from datetime import date
 from datetime import timedelta
@@ -124,7 +125,8 @@ def test_planttrackerentity_attributes() -> None:
     assert attributes["image"] == "test_plant"
 
 
-def test_planttrackerentity_update() -> None:
+@pytest.mark.asyncio
+async def test_planttrackerentity_update() -> None:
     """Test the async_update method of the entity."""
     entity = PlantTrackerEntity(
         "test_plant",
@@ -139,12 +141,13 @@ def test_planttrackerentity_update() -> None:
         },
     )
     # Simulate an update
-    asyncio.run(entity.async_update())
+    await entity.async_update()
     # Check if the state is still 0 after update
     assert entity.state == 0
 
 
-def test_planttrackerentity_update_days_since_watered() -> None:
+@pytest.mark.asyncio
+async def test_planttrackerentity_update_days_since_watered() -> None:
     """Test the async_update_days_since_last_watered method of the entity."""
     today_str = date.today().strftime("%Y-%m-%d")
     entity = PlantTrackerEntity(
@@ -160,29 +163,29 @@ def test_planttrackerentity_update_days_since_watered() -> None:
         },
     )
     # Simulate an update of days since last watered
-    asyncio.run(entity.async_update_days_since_last_watered())
+    await entity.async_update_days_since_last_watered()
     # Check if the state is still 0 after update
     assert entity.state == 3
 
     # Simulate a date 13 days ago
     date_13_days_ago = (date.today() - timedelta(days=13)).strftime("%Y-%m-%d")
     entity._last_watered = date_13_days_ago
-    asyncio.run(entity.async_update_days_since_last_watered())
+    await entity.async_update_days_since_last_watered()
     assert entity.state == 2
 
     # Simulate a date 15 days ago
     date_15_days_ago = (date.today() - timedelta(days=15)).strftime("%Y-%m-%d")
     entity._last_watered = date_15_days_ago
-    asyncio.run(entity.async_update_days_since_last_watered())
+    await entity.async_update_days_since_last_watered()
     assert entity.state == 0
 
     # Simulate a date 15 days ago + postponed watering
     entity._watering_postponed = 2
     entity._last_watered = date_15_days_ago
-    asyncio.run(entity.async_update_days_since_last_watered())
+    await entity.async_update_days_since_last_watered()
     assert entity.state == 1
 
     # Simulate a date error
     entity._last_watered = "invalid-date"
-    asyncio.run(entity.async_update_days_since_last_watered())
+    await entity.async_update_days_since_last_watered()
     assert entity.state == 0
