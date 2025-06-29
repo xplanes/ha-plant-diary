@@ -1,8 +1,10 @@
-"""Platform for sensor integration."""
+"""Plant Tracker Entity."""
 
+from datetime import date, datetime
+from propcache.api import cached_property
 from typing import Any
+
 from homeassistant.components.sensor import SensorEntity
-from datetime import datetime
 
 
 class PlantTrackerEntity(SensorEntity):
@@ -10,46 +12,75 @@ class PlantTrackerEntity(SensorEntity):
 
     def __init__(self, plant_id: str, data: dict[str, Any]) -> None:
         """Initialize the sensor."""
-        self._plant_id = plant_id
-        self._name = f"plant_tracker_{plant_id}"
-        self._unique_id = self._name
+        self._plant_id: str = plant_id
+        self._name: str = f"plant_tracker_{plant_id}"
+        self._unique_id: str = self._name
+        self._plant_name: str = data.get("plant_name", plant_id)
+        self._last_watered: date | None = None
+        self._last_fertilized: date | None = None
+        self._watering_interval: int = 14
+        self._watering_postponed: int = 0
+        self._days_since_watered: int = 0
+        self._inside: bool = True
+        self._image: str = plant_id
+        self._state: int = 0
 
         # Load data
-        self._plant_name = data.get("plant_name", plant_id)
-        self._last_watered = data.get("last_watered", "Unknown")
-        self._last_fertilized = data.get("last_fertilized", "Unknown")
-        self._watering_interval = data.get("watering_interval", 14)
-        self._watering_postponed = data.get("watering_postponed", 0)
-        self._days_since_watered = data.get("days_since_watered", 0)
-        self._inside = data.get("inside", True)
-        self._image = plant_id
-        self._state = 0
+        self.update_from_dict(data)
 
-    @property
+    @cached_property
     def name(self) -> str:
         """Return the name of the sensor."""
         return self._name
 
-    @property
+    @cached_property
     def unique_id(self) -> str | None:
         """Return a unique ID for this entity."""
         return self._unique_id
 
-    @property
-    def state(self):
+    @cached_property
+    def native_value(self) -> int:
+        """Return the state of the sensor."""
         return self._state
 
-    @property
-    def icon(self):
+    @cached_property
+    def icon(self) -> str:
+        """Return the icon to use in the frontend."""
         return "mdi:flower"
 
-    @property
+    def update_from_dict(self, data: dict[str, Any]) -> None:
+        """Update entity attributes from a dictionary."""
+        if "last_watered" in data:
+            self._last_watered: date | None = self._parse_date(data["last_watered"])
+        if "last_fertilized" in data:
+            self._last_fertilized: date | None = self._parse_date(
+                data["last_fertilized"]
+            )
+        if "watering_interval" in data:
+            self._watering_interval: int = self._parse_int(data["watering_interval"])
+        if "watering_postponed" in data:
+            self._watering_postponed: int = self._parse_int(data["watering_postponed"])
+        if "inside" in data:
+            self._inside = bool(data["inside"])
+        if "plant_name" in data:
+            self._plant_name: str = data["plant_name"]
+        if "image" in data:
+            self._image: str = data["image"]
+
+        # Clear cached extra_state_attributes
+        self.__dict__.pop("extra_state_attributes", None)
+
+    @cached_property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return {
             "plant_name": self._plant_name,
-            "last_watered": self._last_watered,
-            "last_fertilized": self._last_fertilized,
+            "last_watered": self._last_watered.isoformat()
+            if self._last_watered
+            else "Unknown",
+            "last_fertilized": self._last_fertilized.isoformat()
+            if self._last_fertilized
+            else "Unknown",
             "watering_interval": self._watering_interval,
             "watering_postponed": self._watering_postponed,
             "days_since_watered": self._days_since_watered,
@@ -61,24 +92,40 @@ class PlantTrackerEntity(SensorEntity):
         """Update the sensor data."""
         await self.async_update_days_since_last_watered()
 
-    async def async_update_days_since_last_watered(self):
+    async def async_update_days_since_last_watered(self) -> None:
         """Calculate and update days since last watered."""
-        try:
-            last_watered_date = datetime.strptime(self._last_watered, "%Y-%m-%d").date()
-            self._days_since_watered = (
-                datetime.today().date() - last_watered_date
-            ).days
-        except ValueError:
+        if self._last_watered is None:
             self._state = 0
-            return
-
-        if self._days_since_watered == 0:
-            self._state = 3
-        elif self._days_since_watered < int(self._watering_interval):
-            self._state = 2
-        elif self._days_since_watered < int(self._watering_interval) + int(
-            self._watering_postponed
-        ):
-            self._state = 1
         else:
-            self._state = 0
+            self._days_since_watered = (
+                datetime.today().date() - self._last_watered
+            ).days
+
+            if self._days_since_watered == 0:
+                self._state = 3
+            elif self._days_since_watered < self._watering_interval:
+                self._state = 2
+            elif (
+                self._days_since_watered
+                < self._watering_interval + self._watering_postponed
+            ):
+                self._state = 1
+            else:
+                self._state = 0
+
+        # Clear cached native_value
+        self.__dict__.pop("native_value", None)
+
+    def _parse_date(self, value: Any) -> date | None:
+        if isinstance(value, str):
+            try:
+                return datetime.strptime(value, "%Y-%m-%d").date()
+            except ValueError:
+                return None
+        return None
+
+    def _parse_int(self, value: Any, default: int = 0) -> int:
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default

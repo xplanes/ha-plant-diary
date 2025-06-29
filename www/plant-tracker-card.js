@@ -179,7 +179,7 @@ class PlantTrackerCard extends HTMLElement {
             this.modalEditPlantBody.querySelector('#watering_postponed_btn')
                 .addEventListener('click', () => {
                     this._fireEvent('haptic', 'light');
-                    this.modalEditPlantBody.querySelector('#watering_postponed').value++;
+                    this.modalEditPlantBody.querySelector('#watering_postponed').value = parseInt(this.modalEditPlantBody.querySelector('#watering_postponed').value) + 1;
                 });
 
             this.modalEditPlant.style.display = "block";
@@ -355,7 +355,7 @@ class PlantTrackerCard extends HTMLElement {
                 </div>
                 <div class="modal-attribute">
                     <label for="watering_postponed">Watering Postponed:</label>
-                    <input type="text" id="watering_postponed" name="watering_postponed" value="${attributes.watering_postponed || 'Unknown'}"><br>
+                    <input type="text" id="watering_postponed" name="watering_postponed" value="${attributes.watering_postponed || '0'}"><br>
                     <button type="button" id="watering_postponed_btn">
                         <ha-icon icon="mdi:sleep"></ha-icon>
                     </button>
@@ -427,7 +427,7 @@ class PlantTrackerCard extends HTMLElement {
                         <p class="last_watered">Last Watered: ${attributes.last_watered || 'Unknown'}</p>
                         <p class="last_fertilized">Last Fertilized: ${attributes.last_fertilized || 'Unknown'}</p>
                         <p class="due">Due: ${(parseFloat(attributes.watering_interval) - parseFloat(attributes.days_since_watered))} / ${Math.round(parseFloat(attributes.watering_interval)) || 'Unknown'} days</p>
-                        <p class="watering_postponed">Watering Postponed: ${attributes.watering_postponed || 'Unknown'}</p>
+                        <p class="watering_postponed">Watering Postponed: ${attributes.watering_postponed || '0'}</p>
                     </div>
                     `;
                 }

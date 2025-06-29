@@ -241,8 +241,8 @@ async def test_planttrackermanager_update_plant() -> None:
     }
     await manager.update_plant(updated_data)
     updatedPlant = manager.entities["Existing Plant"]
-    assert updatedPlant._last_watered == "2023-10-02"
-    assert updatedPlant._last_fertilized == "2023-10-02"
+    assert updatedPlant._last_watered.isoformat() == "2023-10-02"
+    assert updatedPlant._last_fertilized.isoformat() == "2023-10-02"
     assert updatedPlant._watering_interval == 7
     assert updatedPlant._watering_postponed == 0
     assert updatedPlant._inside is False

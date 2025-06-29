@@ -84,20 +84,7 @@ class PlantTrackerManager:
             _LOGGER.error("Plant with ID %s not found", plant_id)
             return
 
-        if "last_watered" in data:
-            entity._last_watered = data["last_watered"]
-        if "last_fertilized" in data:
-            entity._last_fertilized = data["last_fertilized"]
-        if "watering_interval" in data:
-            entity._watering_interval = data["watering_interval"]
-        if "watering_postponed" in data:
-            entity._watering_postponed = data["watering_postponed"]
-        if "inside" in data:
-            entity._inside = data["inside"]
-        if "plant_name" in data:
-            entity._plant_name = data["plant_name"]
-        if "image" in data:
-            entity._image = data["image"]
+        entity.update_from_dict(data)
 
         # Update the days since last watered
         await entity.async_update()
