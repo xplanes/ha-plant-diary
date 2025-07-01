@@ -28,6 +28,9 @@ class PlantTrackerEntity(SensorEntity):
         # Load data
         self.update_from_dict(data)
 
+        # Calculate initial state
+        self.update_days_since_last_watered()
+
     @cached_property
     def name(self) -> str:
         """Return the name of the sensor."""
@@ -90,9 +93,9 @@ class PlantTrackerEntity(SensorEntity):
 
     async def async_update(self) -> None:
         """Update the sensor data."""
-        await self.async_update_days_since_last_watered()
+        self.update_days_since_last_watered()
 
-    async def async_update_days_since_last_watered(self) -> None:
+    def update_days_since_last_watered(self) -> None:
         """Calculate and update days since last watered."""
         if self._last_watered is None:
             self._state = 0

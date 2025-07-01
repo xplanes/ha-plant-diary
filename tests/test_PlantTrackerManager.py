@@ -319,7 +319,7 @@ async def test_planttrackermanager_update_days_since_watered() -> None:
     }
     manager = PlantTrackerManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
-    await manager._update_all_days_since_last_watered(None)
+    manager._update_all_days_since_last_watered(None)
     assert manager.entities["Plant to Update"]._days_since_watered > 1
 
 

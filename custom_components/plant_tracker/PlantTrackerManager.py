@@ -152,10 +152,10 @@ class PlantTrackerManager:
         if save_to_config:
             self.update_all_plants(plant_id, entity.extra_state_attributes)
 
-    async def _update_all_days_since_last_watered(self, now):
+    def _update_all_days_since_last_watered(self, now):
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
-            await entity.async_update_days_since_last_watered()
+            entity.update_days_since_last_watered()
 
     async def async_unload(self):
         """Unload the manager and remove all entities."""
