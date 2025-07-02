@@ -46,7 +46,7 @@ class PlantTrackerManager:
             await self.delete_plant(call.data["plant_id"])
 
         async def handle_update_days_since_last_watered(call: ServiceCall):
-            await self._update_all_days_since_last_watered(None)
+            self._update_all_days_since_last_watered(None)
 
         hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
