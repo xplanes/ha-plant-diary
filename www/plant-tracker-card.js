@@ -176,10 +176,25 @@ class PlantTrackerCard extends HTMLElement {
                     this._fireEvent('haptic', 'light');
                     this.modalEditPlantBody.querySelector('#last_fertilized').value = this.getTodayDate();
                 });
-            this.modalEditPlantBody.querySelector('#watering_postponed_btn')
+            this.modalEditPlantBody.querySelector('#watering_postponed_inc_btn')
                 .addEventListener('click', () => {
                     this._fireEvent('haptic', 'light');
                     this.modalEditPlantBody.querySelector('#watering_postponed').value = parseInt(this.modalEditPlantBody.querySelector('#watering_postponed').value) + 1;
+                });
+            this.modalEditPlantBody.querySelector('#watering_postponed_dec_btn')
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#watering_postponed').value = parseInt(this.modalEditPlantBody.querySelector('#watering_postponed').value) - 1;
+                });
+            this.modalEditPlantBody.querySelector('#watering_days_inc_btn')
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#watering_days').value = parseInt(this.modalEditPlantBody.querySelector('#watering_days').value) + 1;
+                });
+            this.modalEditPlantBody.querySelector('#watering_days_dec_btn')
+                .addEventListener('click', () => {
+                    this._fireEvent('haptic', 'light');
+                    this.modalEditPlantBody.querySelector('#watering_days').value = parseInt(this.modalEditPlantBody.querySelector('#watering_days').value) - 1;
                 });
 
             this.modalEditPlant.style.display = "block";
@@ -341,14 +356,14 @@ class PlantTrackerCard extends HTMLElement {
         content += `
                 <div class="modal-attribute">
                     <label for="last_watered">Last Watered:</label>
-                    <input type="text" id="last_watered" name="last_watered" value="${attributes.last_watered || 'Unknown'}"><br>
+                    <input type="date" id="last_watered" name="last_watered" value="${attributes.last_watered || 'Unknown'}"><br>
                     <button type="button" id="last_watered_btn">
                         <ha-icon icon="mdi:water"></ha-icon>
                     </button>
                 </div>
                 <div class="modal-attribute">
                     <label for="last_fertilized">Last Fertilized:</label>
-                    <input type="text" id="last_fertilized" name="last_fertilized" value="${attributes.last_fertilized || 'Unknown'}"><br>
+                    <input type="date" id="last_fertilized" name="last_fertilized" value="${attributes.last_fertilized || 'Unknown'}"><br>
                     <button type="button" id="last_fertilized_btn">
                         <ha-icon icon="mdi:food-fork-drink"></ha-icon>
                     </button>
@@ -356,13 +371,22 @@ class PlantTrackerCard extends HTMLElement {
                 <div class="modal-attribute">
                     <label for="watering_postponed">Watering Postponed:</label>
                     <input type="text" id="watering_postponed" name="watering_postponed" value="${attributes.watering_postponed || '0'}"><br>
-                    <button type="button" id="watering_postponed_btn">
+                    <button type="button" id="watering_postponed_inc_btn">
                         <ha-icon icon="mdi:sleep"></ha-icon>
+                    </button>
+                    <button type="button" id="watering_postponed_dec_btn">
+                        <ha-icon icon="mdi:sleep-off"></ha-icon>
                     </button>
                 </div>
                 <div class="modal-attribute">
                     <label for="watering_days">Watering days:</label>
                     <input type="text" id="watering_days" name="watering_days" value="${(attributes.watering_interval) || 'Unknown'}"><br>
+                    <button type="button" id="watering_days_inc_btn">
+                        <ha-icon icon="mdi:chevron-double-up"></ha-icon>
+                    </button>
+                    <button type="button" id="watering_days_dec_btn">
+                        <ha-icon icon="mdi:chevron-double-down"></ha-icon>
+                    </button>
                 </div>
                 <div class="modal-attribute">
                     <label for="inside">Inside:</label>
@@ -614,6 +638,7 @@ class PlantTrackerCard extends HTMLElement {
             }
             .modal-attribute input[type="text"],
             .modal-attribute input[type="number"],
+            .modal-attribute input[type="date"],
             .modal-attribute select {
                 flex: 1;
                 text-align: right;
