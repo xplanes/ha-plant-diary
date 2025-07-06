@@ -409,9 +409,7 @@ class PlantTrackerCard extends HTMLElement {
                 if (isInside === attributes.inside) {
 
                     // Check if the plant needs watering
-                    const interval = parseFloat(attributes.watering_interval) || 0;
-                    const days = parseFloat(attributes.days_since_watered) || 0;
-                    const isDue = days >= interval;
+                    const isDue = state.state < 2;
                     if (showOnlyDue && !isDue) continue;
 
                     const backgroundColor = this.getBackgroundColor(stateStr);
