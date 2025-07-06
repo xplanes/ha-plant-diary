@@ -630,7 +630,7 @@ class PlantTrackerCard extends HTMLElement {
                 min-height: 30px;
             }
             .modal-attribute label {
-                width: 150px;
+                width: 130px;
                 text-align: left;
             }
             .modal-attribute input {
