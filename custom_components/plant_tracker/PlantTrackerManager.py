@@ -3,6 +3,7 @@
 import logging
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.logbook import async_log_entry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -79,7 +80,18 @@ class PlantTrackerManager:
             "inside": data.get("inside", True),
             "image": data.get("image", f"plant_tracker.{plant_id}"),
         }
+
         await self._add_plant_entity(plant_id, plant_data, save_to_config=True)
+
+        entity = self.entities.get(plant_id)
+        if entity:
+            async_log_entry(
+                self.hass,
+                name="Plant Tracker",
+                message=f"Added new plant: {plant_id}",
+                domain=DOMAIN,
+                entity_id=f"{entity.entity_id}",
+            )
 
     async def update_plant(self, data: dict):
         """Update an existing plant."""
@@ -95,10 +107,18 @@ class PlantTrackerManager:
         await entity.async_update()
 
         # Guardar en la entrada de configuración
-        self.update_all_plants(plant_id, entity.extra_state_attributes)
+        self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
         # Force update the entity state
         entity.async_schedule_update_ha_state(True)
+
+        async_log_entry(
+            self.hass,
+            name="Plant Tracker",
+            message=f"Updated plant: {plant_id}",
+            domain=DOMAIN,
+            entity_id=f"{entity.entity_id}",
+        )
 
     async def delete_plant(self, plant_id: str, update_config_entry: bool = True):
         """Delete a plant tracker entity."""
@@ -109,7 +129,7 @@ class PlantTrackerManager:
 
         # Remove from config entry
         if update_config_entry:
-            self.update_all_plants(plant_id, None)
+            self.update_plant_in_config_entry(plant_id, None)
 
         # Remove the entity from Home Assistant
         await entity.async_remove()
@@ -120,11 +140,19 @@ class PlantTrackerManager:
         if entity_entry:
             entity_registry.async_remove(entity_entry.entity_id)
 
+        async_log_entry(
+            self.hass,
+            name="Plant Tracker",
+            message=f"Deleted plant: {plant_id}",
+            domain=DOMAIN,
+            entity_id=f"{entity.entity_id}",
+        )
+
         # Remove from the entities dictionary
         del self.entities[plant_id]
 
-    def update_all_plants(self, plant_id: str, plant_data: dict | None):
-        """Update all plants in the config entry. When plant_data is none, the plant is removed."""
+    def update_plant_in_config_entry(self, plant_id: str, plant_data: dict | None):
+        """Update a plant in the config entry. When plant_data is none, the plant is removed."""
         raw_plants = dict(self.entry.data.get("plants", {}))
         all_plants = {}
         if isinstance(raw_plants, dict):
@@ -155,13 +183,21 @@ class PlantTrackerManager:
 
         # Guardar en la entrada de configuración si corresponde
         if save_to_config:
-            self.update_all_plants(plant_id, entity.extra_state_attributes)
+            self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
     def update_all_days_since_last_watered(self, now):
         """Update the days since last watered for all plant entities."""
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
             entity.update_days_since_last_watered()
+
+        async_log_entry(
+            self.hass,
+            name="Plant Tracker",
+            message="Updated days since last watered for all plants",
+            domain=DOMAIN,
+            entity_id=None,  # No specific entity ID for this log entry
+        )
 
     async def async_unload(self):
         """Unload the manager and remove all entities."""
