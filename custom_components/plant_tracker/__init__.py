@@ -9,7 +9,6 @@ from homeassistant.helpers.typing import ConfigType
 from .const import DOMAIN, PLANT_TRACKER_MANAGER
 from .PlantTrackerManager import PlantTrackerManager
 
-
 _LOGGER = logging.getLogger(__name__)
 
 

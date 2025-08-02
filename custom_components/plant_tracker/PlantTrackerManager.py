@@ -1,14 +1,15 @@
 """Module for managing the Plant Tracker component."""
 
 import logging
-from homeassistant.core import HomeAssistant, ServiceCall
+
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.event import async_track_time_change
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import entity_registry as er
-from typing import Optional
-from .PlantTrackerEntity import PlantTrackerEntity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_time_change
+
 from .const import DOMAIN
+from .PlantTrackerEntity import PlantTrackerEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,17 +17,20 @@ _LOGGER = logging.getLogger(__name__)
 class PlantTrackerManager:
     """Manager class to handle multiple PlantTrackerEntity instances."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+        """Initialize the PlantTrackerManager with Home Assistant instance and config entry."""
         self.hass = hass
-        self.entry = entry
+        self.entry = config_entry
         self.entities = {}
         self._async_add_entities = None
         self._midnight_listener = None
 
     async def async_init(self):
+        """Initialize the PlantTrackerManager by registering services."""
         await self.async_register_services()
 
     async def restore_and_add_entities(self, async_add_entities: AddEntitiesCallback):
+        """Restore plant entities from config entry and add them to Home Assistant."""
         self._async_add_entities = async_add_entities
         plants_data = self.entry.data.get("plants", {})
 
@@ -34,6 +38,7 @@ class PlantTrackerManager:
             await self._add_plant_entity(plant_id, plant_data, save_to_config=False)
 
     async def async_register_services(self):
+        """Register Home Assistant services for plant management."""
         hass = self.hass
 
         async def handle_create_plant(call: ServiceCall):
@@ -118,8 +123,8 @@ class PlantTrackerManager:
         # Remove from the entities dictionary
         del self.entities[plant_id]
 
-    def update_all_plants(self, plant_id: str, plant_data: Optional[dict]):
-        """Update all plants in the config entry."""
+    def update_all_plants(self, plant_id: str, plant_data: dict | None):
+        """Update all plants in the config entry. When plant_data is none, the plant is removed."""
         raw_plants = dict(self.entry.data.get("plants", {}))
         all_plants = {}
         if isinstance(raw_plants, dict):
@@ -153,6 +158,7 @@ class PlantTrackerManager:
             self.update_all_plants(plant_id, entity.extra_state_attributes)
 
     def update_all_days_since_last_watered(self, now):
+        """Update the days since last watered for all plant entities."""
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
             entity.update_days_since_last_watered()

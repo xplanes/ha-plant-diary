@@ -1,7 +1,13 @@
+"""Sensor platform for the Plant Tracker custom component.
+
+This module sets up the Plant Tracker sensor platform and integrates it with Home Assistant.
+"""
+
 import logging
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, PLANT_TRACKER_MANAGER
 from .PlantTrackerManager import PlantTrackerManager

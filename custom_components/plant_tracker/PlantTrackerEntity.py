@@ -1,8 +1,9 @@
 """Plant Tracker Entity."""
 
 from datetime import date, datetime
-from propcache.api import cached_property
 from typing import Any
+
+from propcache.api import cached_property
 
 from homeassistant.components.sensor import SensorEntity
 
@@ -120,6 +121,7 @@ class PlantTrackerEntity(SensorEntity):
         self.__dict__.pop("native_value", None)
 
     def _parse_date(self, value: Any) -> date | None:
+        """Parse a date from various formats."""
         if isinstance(value, str):
             try:
                 return datetime.strptime(value, "%Y-%m-%d").date()
@@ -128,6 +130,7 @@ class PlantTrackerEntity(SensorEntity):
         return None
 
     def _parse_int(self, value: Any, default: int = 0) -> int:
+        """Parse an integer from various formats."""
         try:
             return int(value)
         except (ValueError, TypeError):
