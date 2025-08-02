@@ -8,5 +8,5 @@
   "name": "Plant Tracker",
   "requirements": [],
   "version": "1.0.0",
-  "platforms": ["sensor"]
+  "issue_tracker": "https://github.com/xplanes/ha-plant-tracker/issues"
 }
