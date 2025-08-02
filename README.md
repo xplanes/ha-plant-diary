@@ -7,15 +7,21 @@ This work has been inspired by [Plant tracker for Home Assistant](https://github
 
 ## Features
 
-- Track multiple plants with individual settings
-- Display days since last watering or fertilizing
-- Custom watering intervals and postponements
-- Indoor/outdoor plants
-- Configurable plant image
-- Built-in services to create, update, and delete plants
-- Automatic daily updates
-- Logbook integration for activity tracking
-- Companion Lovelace card
+- **Component**
+  - Track multiple plants with individual settings
+  - Custom watering intervals and postponements
+  - Indoor/outdoor plant designation
+  - Automatic daily updates for watering days
+  - Logbook integration for activity tracking
+- **Companion Lovelace Card**
+  - Shows days since last watering and fertilizing
+  - Supports customizable images for each plant
+  - Shows each plant’s watering status with intuitive color codes:
+    - 🟢 Green: within watering interval
+    - 🔴 Red: past watering interval
+    - 🟠 Orange: within postponed watering interval
+  - Option to show only plants that currently need watering
+  - Quick access to edit plant details via popup dialog
 
 
 # 🌱 Plant Tracker Component
@@ -55,13 +61,6 @@ These messages appear in Home Assistant’s **Logbook** panel.
 # 🖥️ Lovelace Card
 
 Visualize your plants and their watering status using a custom Lovelace card.
-
-## Features
-
-- Displays each plant with its current watering status
-- Shows days since last watering and fertilizing
-- Customizable images for each plant
-- Quick access to edit plant details via popup
 
 ## Preview
 
