@@ -2,13 +2,15 @@
 
 **Plant Tracker** is a custom integration and Lovelace card for [Home Assistant](https://www.home-assistant.io/) that helps you manage and monitor your houseplants. Track when each plant was last watered or fertilized, define care intervals, and visualize everything with a custom card.
 
+This work has been inspired by [Plant tracker for Home Assistant](https://github.com/mountwebs/ha-plant-tracker).
 
-## 📦 Features
+
+## Features
 
 - Track multiple plants with individual settings
 - Display days since last watering or fertilizing
 - Custom watering intervals and postponements
-- Indoor/outdoor plant flag
+- Indoor/outdoor plants
 - Configurable plant image
 - Built-in services to create, update, and delete plants
 - Automatic daily updates
@@ -16,9 +18,9 @@
 - Companion Lovelace card
 
 
-# Plant Tracker Component
+# 🌱 Plant Tracker Component
 
-## 🛠️ Installation
+## Installation
 
 ### Manual Installation
 
@@ -26,7 +28,7 @@
 2. Copy the `plant_tracker` folder to your Home Assistant `custom_components/` directory:
 3. Restart Home Assistant.
 4. Go to **Settings > Devices & Services > Add Integration**.
-5. Search for **Plant Tracker**.
+5. Search for **Plant Tracker** and add it.
 
 ## Plant Data Fields
 
@@ -40,13 +42,9 @@
 | `inside`              | Whether the plant is indoors (`true` or `false`)          |
 | `image`               | Custom image path or entity picture (optional)            |
 
-
-## 📔 Logbook Integration
+## Logbook Integration
 
 Plant Tracker logs important events to the Home Assistant logbook. These entries help you keep track of changes made either manually or via automation.
-
-### Examples of logbook messages:
-
 - `Monstera was created.`
 - `Monstera was updated.`
 - `Monstera was deleted.`
@@ -54,9 +52,31 @@ Plant Tracker logs important events to the Home Assistant logbook. These entries
 These messages appear in Home Assistant’s **Logbook** panel.
 
 
-# 🖼️ Lovelace Card
+# 🖥️ Lovelace Card
 
 Visualize your plants and their watering status using a custom Lovelace card.
+
+## Features
+
+- Displays each plant with its current watering status
+- Shows days since last watering and fertilizing
+- Customizable images for each plant
+- Quick access to edit plant details via popup
+
+## Preview
+
+### Plant Tracker Card
+
+![Plant Tracker Card](docs/plant-tracker-card.png)
+
+*Overview of multiple plants and their watering status.*
+
+### Edit Plant Popup
+
+![Edit Plant](docs/edit-popup.png)
+
+*Popup dialog for editing plant details such as watering schedule and last watered date.*
+
 
 ## Installation
 
@@ -64,20 +84,26 @@ Visualize your plants and their watering status using a custom Lovelace card.
 2. Add the resource to your dashboard via **Settings > Dashboards > Resources**:
 
 ```yaml
-resources:
-  - url: /local/plant-tracker-card.js
-    type: module
+URL: /local/plant-tracker-card.js
 ```
 
 ## Example Card Configuration
 
 ```yaml
 type: custom:plant-tracker-card
-title: My Plants
-entities:
-  - entity: sensor.plant_tracker_monstera
-  - entity: sensor.plant_tracker_aloe_vera
 ```
+
+## Adding Plant Images
+
+You can add custom images for your plants to enhance the Lovelace card and UI experience.
+
+1. Place your plant images in your Home Assistant `config/www/plant_tracker/` directory.
+   - The image filename **must** match the plant's name, e.g., `Monstera.jpg` for a plant named "Monstera".
+   - Example path:
+     ```
+     config/www/plant_tracker/Monstera.jpg
+     ```
+The Lovelace card and UI will use this image for the corresponding plant.
 
 # 🐛 Issues & Feedback
 
