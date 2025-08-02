@@ -201,3 +201,70 @@ async def test_planttrackerentity_update_days_since_watered() -> None:
     entity._last_watered = None
     entity.update_days_since_last_watered()
     assert entity.native_value == 0
+
+
+def test_planttrackerentity_parse_date() -> None:
+    """Test the _parse_date method of the entity."""
+    entity = PlantTrackerEntity(
+        "test_plant",
+        {
+            "plant_name": "Test Plant",
+            "last_watered": "2023-10-01",
+            "last_fertilized": "2023-09-15",
+            "watering_interval": 14,
+            "watering_postponed": 0,
+            "days_since_watered": 1,
+            "inside": True,
+        },
+    )
+    assert entity._parse_date("2023-10-01") == date(2023, 10, 1)
+    assert entity._parse_date("invalid-date") is None
+    assert entity._parse_date(None) is None
+    assert entity._parse_date(12345) is None  # Non-string input should return None
+
+
+def test_planttrackerentity_clear_cache() -> None:
+    """Test that the extra_state_attributes cache is cleared."""
+    entity = PlantTrackerEntity(
+        "test_plant",
+        {
+            "plant_name": "Test Plant",
+            "last_watered": "2023-10-01",
+            "last_fertilized": "2023-09-15",
+            "watering_interval": 14,
+            "watering_postponed": 0,
+            "days_since_watered": 1,
+            "inside": True,
+        },
+    )
+    # Access extra_state_attributes to populate the cache
+    _ = entity.extra_state_attributes
+    # Clear the cache
+    entity.__dict__.pop("extra_state_attributes", None)
+    # Check if the cache is cleared
+    assert "extra_state_attributes" not in entity.__dict__
+
+
+def test_planttrackerentity_parse_int() -> None:
+    """Test the _parse_int method of the entity."""
+    entity = PlantTrackerEntity(
+        "test_plant",
+        {
+            "plant_name": "Test Plant",
+            "last_watered": "2023-10-01",
+            "last_fertilized": "2023-09-15",
+            "watering_interval": 14,
+            "watering_postponed": 0,
+            "days_since_watered": 1,
+            "inside": True,
+        },
+    )
+    assert entity._parse_int("42") == 42
+    assert entity._parse_int("invalid") == 0
+    assert entity._parse_int(None) == 0
+    assert entity._parse_int(100) == 100  # Integer input should return itself
+    assert entity._parse_int(3.14) == 3  # Float input should return truncated integer
+    assert entity._parse_int(True) == 1  # Boolean input should return 1
+    assert entity._parse_int(False) == 0  # Boolean input should return 0
+    assert entity._parse_int([]) == 0  # List input should return 0
+    assert entity._parse_int({}) == 0  # Dict input should return 0

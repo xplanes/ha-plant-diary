@@ -103,7 +103,7 @@ async def test_planttrackermanager_async_init(mock_async_track_time_change) -> N
     assert manager._midnight_listener is not None
     mock_async_track_time_change.assert_called_once_with(
         hass,
-        manager._update_all_days_since_last_watered,
+        manager.update_all_days_since_last_watered,
         hour=0,
         minute=0,
         second=0,
@@ -122,7 +122,7 @@ async def test_service_handlers_register_and_call(mock_async_track_time_change):
     manager.create_plant = AsyncMock()
     manager.update_plant = AsyncMock()
     manager.delete_plant = AsyncMock()
-    manager._update_all_days_since_last_watered = AsyncMock()
+    manager.update_all_days_since_last_watered = AsyncMock()
 
     # Patch async_track_time_change to avoid lingering timers
     with patch("homeassistant.helpers.event.async_track_time_change"):
@@ -159,7 +159,7 @@ async def test_service_handlers_register_and_call(mock_async_track_time_change):
         {},
         blocking=True,
     )
-    manager._update_all_days_since_last_watered.assert_called_once()
+    manager.update_all_days_since_last_watered.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -319,7 +319,7 @@ async def test_planttrackermanager_update_days_since_watered() -> None:
     }
     manager = PlantTrackerManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
-    manager._update_all_days_since_last_watered(None)
+    manager.update_all_days_since_last_watered(None)
     assert manager.entities["Plant to Update"]._days_since_watered > 1
 
 

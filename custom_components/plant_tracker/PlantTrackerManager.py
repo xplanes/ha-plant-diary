@@ -46,7 +46,7 @@ class PlantTrackerManager:
             await self.delete_plant(call.data["plant_id"])
 
         async def handle_update_days_since_last_watered(call: ServiceCall):
-            self._update_all_days_since_last_watered(None)
+            self.update_all_days_since_last_watered(None)
 
         hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
@@ -56,7 +56,7 @@ class PlantTrackerManager:
         )
         self._midnight_listener = async_track_time_change(
             self.hass,
-            self._update_all_days_since_last_watered,
+            self.update_all_days_since_last_watered,
             hour=0,
             minute=0,
             second=0,
@@ -152,7 +152,7 @@ class PlantTrackerManager:
         if save_to_config:
             self.update_all_plants(plant_id, entity.extra_state_attributes)
 
-    def _update_all_days_since_last_watered(self, now):
+    def update_all_days_since_last_watered(self, now):
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
             entity.update_days_since_last_watered()
