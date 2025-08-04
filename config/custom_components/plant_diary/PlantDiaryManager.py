@@ -1,4 +1,4 @@
-"""Module for managing the Plant Tracker component."""
+"""Module for managing the Plant Diary component."""
 
 import logging
 
@@ -10,16 +10,16 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_change
 
 from .const import DOMAIN
-from .PlantTrackerEntity import PlantTrackerEntity
+from .PlantDiaryEntity import PlantDiaryEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class PlantTrackerManager:
-    """Manager class to handle multiple PlantTrackerEntity instances."""
+class PlantDiaryManager:
+    """Manager class to handle multiple PlantDiaryEntity instances."""
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
-        """Initialize the PlantTrackerManager with Home Assistant instance and config entry."""
+        """Initialize the PlantDiaryManager with Home Assistant instance and config entry."""
         self.hass = hass
         self.entry = config_entry
         self.entities = {}
@@ -27,7 +27,7 @@ class PlantTrackerManager:
         self._midnight_listener = None
 
     async def async_init(self):
-        """Initialize the PlantTrackerManager by registering services."""
+        """Initialize the PlantDiaryManager by registering services."""
         await self.async_register_services()
 
     async def restore_and_add_entities(self, async_add_entities: AddEntitiesCallback):
@@ -69,7 +69,7 @@ class PlantTrackerManager:
         )
 
     async def create_plant(self, data: dict):
-        """Create a new PlantTrackerEntity and add it."""
+        """Create a new PlantDiaryEntity and add it."""
         plant_id = data["plant_name"]
         plant_data = {
             "plant_name": data.get("plant_name", plant_id),
@@ -78,7 +78,7 @@ class PlantTrackerManager:
             "watering_interval": data.get("watering_interval", 14),
             "watering_postponed": data.get("watering_postponed", 0),
             "inside": data.get("inside", True),
-            "image": data.get("image", f"plant_tracker.{plant_id}"),
+            "image": data.get("image", plant_id),
         }
 
         await self._add_plant_entity(plant_id, plant_data, save_to_config=True)
@@ -87,7 +87,7 @@ class PlantTrackerManager:
         if entity:
             async_log_entry(
                 self.hass,
-                name="Plant Tracker",
+                name="Plant Diary",
                 message=f"Added new plant: {plant_id}",
                 domain=DOMAIN,
                 entity_id=f"{entity.entity_id}",
@@ -114,14 +114,14 @@ class PlantTrackerManager:
 
         async_log_entry(
             self.hass,
-            name="Plant Tracker",
+            name="Plant Diary",
             message=f"Updated plant: {plant_id}",
             domain=DOMAIN,
             entity_id=f"{entity.entity_id}",
         )
 
     async def delete_plant(self, plant_id: str, update_config_entry: bool = True):
-        """Delete a plant tracker entity."""
+        """Delete a plant diary entity."""
         entity = self.entities.get(plant_id)
         if not entity:
             _LOGGER.error("Plant with ID %s not found", plant_id)
@@ -142,7 +142,7 @@ class PlantTrackerManager:
 
         async_log_entry(
             self.hass,
-            name="Plant Tracker",
+            name="Plant Diary",
             message=f"Deleted plant: {plant_id}",
             domain=DOMAIN,
             entity_id=f"{entity.entity_id}",
@@ -170,8 +170,8 @@ class PlantTrackerManager:
     async def _add_plant_entity(
         self, plant_id: str, plant_data: dict, save_to_config: bool = False
     ):
-        """Create and add a PlantTrackerEntity."""
-        entity = PlantTrackerEntity(plant_id, plant_data)
+        """Create and add a PlantDiaryEntity."""
+        entity = PlantDiaryEntity(plant_id, plant_data)
         self.entities[plant_id] = entity
 
         if self._async_add_entities:
@@ -193,7 +193,7 @@ class PlantTrackerManager:
 
         async_log_entry(
             self.hass,
-            name="Plant Tracker",
+            name="Plant Diary",
             message="Updated days since last watered for all plants",
             domain=DOMAIN,
             entity_id=None,  # No specific entity ID for this log entry

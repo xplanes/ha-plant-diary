@@ -17,3 +17,14 @@ test-reports/
 test-results.xml
 test-output.xml
 pytest-*.txt
+
+# config
+config/.cloud
+config/.storage
+config/blueprints
+config/deps
+config/tts
+config/.HA_VERSION
+config/home-assistant*.*
+config/*.yaml
+

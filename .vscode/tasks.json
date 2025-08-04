@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+
+    {
+      "label": "Run Home Assistant",
+      "type": "shell",
+      "command": [
+        "hass -c ./config"
+      ],
+      "problemMatcher": [],
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      },
+      "detail": "Run Home Assistant"
+    }
+  ]
+}

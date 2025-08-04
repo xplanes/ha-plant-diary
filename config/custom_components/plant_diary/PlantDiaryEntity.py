@@ -1,4 +1,4 @@
-"""Plant Tracker Entity."""
+"""Plant Diary Entity."""
 
 from datetime import date, datetime
 from typing import Any
@@ -7,14 +7,16 @@ from propcache.api import cached_property
 
 from homeassistant.components.sensor import SensorEntity
 
+from .const import DOMAIN
 
-class PlantTrackerEntity(SensorEntity):
-    """Representation of a plant tracker sensor."""
+
+class PlantDiaryEntity(SensorEntity):
+    """Representation of a plant diary sensor."""
 
     def __init__(self, plant_id: str, data: dict[str, Any]) -> None:
         """Initialize the sensor."""
         self._plant_id: str = plant_id
-        self._name: str = f"plant_tracker_{plant_id}"
+        self._name: str = f"{DOMAIN}_{plant_id}"
         self._unique_id: str = self._name
         self._plant_name: str = data.get("plant_name", plant_id)
         self._last_watered: date | None = None
@@ -23,7 +25,7 @@ class PlantTrackerEntity(SensorEntity):
         self._watering_postponed: int = 0
         self._days_since_watered: int = 0
         self._inside: bool = True
-        self._image: str = plant_id
+        self._image: str = ""
         self._state: int = 0
 
         # Load data

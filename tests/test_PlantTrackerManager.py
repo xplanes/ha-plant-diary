@@ -1,13 +1,14 @@
-# Test for PlantTrackerManager
-import pytest
-from unittest.mock import MagicMock, patch, ANY, AsyncMock
-from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
-from custom_components.plant_tracker.PlantTrackerManager import PlantTrackerManager
-from custom_components.plant_tracker.const import DOMAIN
+# Test for PlantDiaryManager
 from typing import Iterable
+from unittest.mock import ANY, AsyncMock, MagicMock, patch, Mock
+
+import pytest
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity import Entity
-from homeassistant.core import ServiceCall
+
+from config.custom_components.plant_diary.const import DOMAIN
+from config.custom_components.plant_diary.PlantDiaryManager import PlantDiaryManager
 
 
 def create_test_hass():
@@ -15,6 +16,8 @@ def create_test_hass():
     hass = MagicMock(spec=HomeAssistant)
     hass.async_create_task = AsyncMock()
     hass._added_entities = []
+    hass.bus = MagicMock()
+    hass.bus.async_fire = AsyncMock()
 
     # Dictionary to store registered service handlers
     registered_services = {}
@@ -50,11 +53,11 @@ def create_test_hass():
     return hass
 
 
-def test_planttrackermanager_initialization() -> None:
+def test_plantdiarymanager_initialization() -> None:
     """Test the initialization of the manager."""
     hass = MagicMock(spec=HomeAssistant)
     entry = MagicMock(spec=ConfigEntry)
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     assert manager is not None
     assert manager.hass == hass
     assert manager.entry == entry
@@ -64,8 +67,8 @@ def test_planttrackermanager_initialization() -> None:
 
 
 @pytest.mark.asyncio
-@patch("custom_components.plant_tracker.PlantTrackerManager.async_track_time_change")
-async def test_planttrackermanager_async_init(mock_async_track_time_change) -> None:
+@patch("config.custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
+async def test_plantdiarymanager_async_init(mock_async_track_time_change) -> None:
     """Test the async initialization of the manager."""
     hass = MagicMock(spec=HomeAssistant)
 
@@ -75,7 +78,7 @@ async def test_planttrackermanager_async_init(mock_async_track_time_change) -> N
 
     entry = MagicMock(spec=ConfigEntry)
 
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.async_init()
     # Check if the method runs without errors
     assert manager is not None
@@ -113,10 +116,10 @@ async def test_planttrackermanager_async_init(mock_async_track_time_change) -> N
 
 
 @pytest.mark.asyncio
-@patch("custom_components.plant_tracker.PlantTrackerManager.async_track_time_change")
+@patch("config.custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
 async def test_service_handlers_register_and_call(mock_async_track_time_change):
     hass = create_test_hass()
-    manager = PlantTrackerManager(hass, MagicMock())
+    manager = PlantDiaryManager(hass, MagicMock())
 
     # Patch the methods that the services would call
     manager.create_plant = AsyncMock()
@@ -163,7 +166,7 @@ async def test_service_handlers_register_and_call(mock_async_track_time_change):
 
 
 @pytest.mark.asyncio
-async def test_planttrackermanager_restore_and_add_entities() -> None:
+async def test_plantdiarymanager_restore_and_add_entities() -> None:
     """Test restoring and adding entities."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
@@ -180,7 +183,7 @@ async def test_planttrackermanager_restore_and_add_entities() -> None:
             }
         }
     }
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
 
     assert manager._async_add_entities is not None
@@ -189,12 +192,12 @@ async def test_planttrackermanager_restore_and_add_entities() -> None:
 
 
 @pytest.mark.asyncio
-async def test_planttrackermanager_create_plant() -> None:
+async def test_plantdiarymanager_create_plant() -> None:
     """Test creating a new plant."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
     entry.data = {}
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
     data = {
         "plant_name": "New Plant",
@@ -204,13 +207,14 @@ async def test_planttrackermanager_create_plant() -> None:
         "watering_postponed": 0,
         "inside": True,
     }
-    await manager.create_plant(data)
+    with patch("homeassistant.components.logbook.async_log_entry", None):
+        await manager.create_plant(data)
     assert "New Plant" in manager.entities
     assert manager.entities["New Plant"]._plant_name == "New Plant"
 
 
 @pytest.mark.asyncio
-async def test_planttrackermanager_update_plant() -> None:
+async def test_plantdiarymanager_update_plant() -> None:
     """Test updating an existing plant."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
@@ -227,7 +231,7 @@ async def test_planttrackermanager_update_plant() -> None:
             }
         }
     }
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
     updated_data = {
         "plant_id": "Existing Plant",
@@ -239,7 +243,10 @@ async def test_planttrackermanager_update_plant() -> None:
         "plant_name": "Updated Plant",
         "image": "Existing Plant",
     }
-    await manager.update_plant(updated_data)
+
+    with patch("homeassistant.components.logbook.async_log_entry", None):
+        await manager.update_plant(updated_data)
+
     updatedPlant = manager.entities["Existing Plant"]
     assert updatedPlant._last_watered.isoformat() == "2023-10-02"
     assert updatedPlant._last_fertilized.isoformat() == "2023-10-02"
@@ -256,7 +263,7 @@ async def test_planttrackermanager_update_plant() -> None:
 
 @patch("homeassistant.helpers.entity_registry.async_get")
 @pytest.mark.asyncio
-async def test_planttrackermanager_delete_plant(mock_er_async_get) -> None:
+async def test_plantdiarymanager_delete_plant(mock_er_async_get) -> None:
     """Test deleting an existing plant."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
@@ -273,7 +280,7 @@ async def test_planttrackermanager_delete_plant(mock_er_async_get) -> None:
             }
         }
     }
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
 
     # Mock the entity to be deleted
@@ -283,24 +290,24 @@ async def test_planttrackermanager_delete_plant(mock_er_async_get) -> None:
     # Mock the entity registry
     fake_registry = MagicMock()
     fake_entry = MagicMock()
-    fake_entry.entity_id = "plant_tracker.plant_to_delete"
+    fake_entry.entity_id = "plant_diary.plant_to_delete"
 
     fake_registry.async_get.return_value = fake_entry
     fake_registry.async_remove = MagicMock()
     mock_er_async_get.return_value = fake_registry
 
-    # Call the delete method
-    await manager.delete_plant("Plant to Delete")
+    with patch("homeassistant.components.logbook.async_log_entry", None):
+        await manager.delete_plant("Plant to Delete")
 
     assert "Plant to Delete" not in manager.entities
-    fake_registry.async_remove.assert_called_once_with("plant_tracker.plant_to_delete")
+    fake_registry.async_remove.assert_called_once_with("plant_diary.plant_to_delete")
 
     # Call the delete method to a non-existing plant
     await manager.delete_plant("Plant to Delete")
 
 
 @pytest.mark.asyncio
-async def test_planttrackermanager_update_days_since_watered() -> None:
+async def test_plantdiarymanager_update_days_since_watered() -> None:
     """Test updating days since last watered for all plants."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
@@ -317,7 +324,7 @@ async def test_planttrackermanager_update_days_since_watered() -> None:
             }
         }
     }
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
     manager.update_all_days_since_last_watered(None)
     assert manager.entities["Plant to Update"]._days_since_watered > 1
@@ -325,7 +332,7 @@ async def test_planttrackermanager_update_days_since_watered() -> None:
 
 @patch("homeassistant.helpers.entity_registry.async_get")
 @pytest.mark.asyncio
-async def test_planttrackermanager_async_unload(mock_er_async_get) -> None:
+async def test_plantdiarymanager_async_unload(mock_er_async_get) -> None:
     """Test unloading the manager."""
     hass = create_test_hass()
     entry = MagicMock(spec=ConfigEntry)
@@ -342,7 +349,7 @@ async def test_planttrackermanager_async_unload(mock_er_async_get) -> None:
             }
         }
     }
-    manager = PlantTrackerManager(hass, entry)
+    manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
 
     # Mock the entity to be deleted
@@ -352,7 +359,7 @@ async def test_planttrackermanager_async_unload(mock_er_async_get) -> None:
     # Mock the entity registry
     fake_registry = MagicMock()
     fake_entry = MagicMock()
-    fake_entry.entity_id = "plant_tracker.plant_to_delete"
+    fake_entry.entity_id = "plant_diary.plant_to_delete"
 
     fake_registry.async_get.return_value = fake_entry
     fake_registry.async_remove = MagicMock()

@@ -1,15 +1,15 @@
-# Test cases for PlantTrackerEntity class in the Plant Tracker custom component for Home Assistant
+# Test cases for PlantDiaryEntity class in the Plant Diary custom component for Home Assistant
 import pytest
-from custom_components.plant_tracker.PlantTrackerEntity import PlantTrackerEntity
+from config.custom_components.plant_diary.PlantDiaryEntity import PlantDiaryEntity
 from datetime import date, datetime, timedelta
 
 
 @pytest.mark.asyncio
-async def test_planttrackerentity_initialization() -> None:
+async def test_plantdiaryentity_initialization() -> None:
     """Test the initialization of the entity."""
     date_1_days_ago = (date.today() - timedelta(days=1)).isoformat()
 
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -23,8 +23,8 @@ async def test_planttrackerentity_initialization() -> None:
     )
     await entity.async_update()  # Simulate async update
     assert entity._plant_id == "test_plant"
-    assert entity._name == "plant_tracker_test_plant"
-    assert entity._unique_id == "plant_tracker_test_plant"
+    assert entity._name == "plant_diary_test_plant"
+    assert entity._unique_id == "plant_diary_test_plant"
     assert entity._plant_name == "Test Plant"
     assert (
         entity._last_watered is not None
@@ -38,12 +38,12 @@ async def test_planttrackerentity_initialization() -> None:
     assert entity._watering_postponed == 0
     assert entity._days_since_watered == 1
     assert entity._inside is True
-    assert entity._image == "test_plant"
+    assert entity._image == ""
 
 
-def test_planttrackerentity_name() -> None:
+def test_plantdiaryentity_name() -> None:
     """Test the name property of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -55,12 +55,12 @@ def test_planttrackerentity_name() -> None:
             "inside": True,
         },
     )
-    assert entity.name == "plant_tracker_test_plant"
+    assert entity.name == "plant_diary_test_plant"
 
 
-def test_planttrackerentity_unique_id() -> None:
+def test_plantdiaryentity_unique_id() -> None:
     """Test the unique ID property of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -72,12 +72,12 @@ def test_planttrackerentity_unique_id() -> None:
             "inside": True,
         },
     )
-    assert entity.unique_id == "plant_tracker_test_plant"
+    assert entity.unique_id == "plant_diary_test_plant"
 
 
-def test_planttrackerentity_state() -> None:
+def test_plantdiaryentity_state() -> None:
     """Test the state property of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -92,9 +92,9 @@ def test_planttrackerentity_state() -> None:
     assert entity.native_value == 0
 
 
-def test_planttrackerentity_icon() -> None:
+def test_plantdiaryentity_icon() -> None:
     """Test the icon property of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -110,10 +110,10 @@ def test_planttrackerentity_icon() -> None:
 
 
 @pytest.mark.asyncio
-async def test_planttrackerentity_attributes() -> None:
+async def test_plantdiaryentity_attributes() -> None:
     """Test the extra state attributes of the entity."""
     date_1_days_ago = (date.today() - timedelta(days=1)).isoformat()
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -134,13 +134,13 @@ async def test_planttrackerentity_attributes() -> None:
     assert attributes["watering_postponed"] == 0
     assert attributes["days_since_watered"] == 1
     assert attributes["inside"] is True
-    assert attributes["image"] == "test_plant"
+    assert attributes["image"] == ""
 
 
 @pytest.mark.asyncio
-async def test_planttrackerentity_update() -> None:
+async def test_plantdiaryentity_update() -> None:
     """Test the async_update method of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -159,10 +159,10 @@ async def test_planttrackerentity_update() -> None:
 
 
 @pytest.mark.asyncio
-async def test_planttrackerentity_update_days_since_watered() -> None:
+async def test_plantdiaryentity_update_days_since_watered() -> None:
     """Test the update_days_since_last_watered method of the entity."""
     today_str = date.today().strftime("%Y-%m-%d")
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -203,9 +203,9 @@ async def test_planttrackerentity_update_days_since_watered() -> None:
     assert entity.native_value == 0
 
 
-def test_planttrackerentity_parse_date() -> None:
+def test_plantdiaryentity_parse_date() -> None:
     """Test the _parse_date method of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -223,9 +223,9 @@ def test_planttrackerentity_parse_date() -> None:
     assert entity._parse_date(12345) is None  # Non-string input should return None
 
 
-def test_planttrackerentity_clear_cache() -> None:
+def test_plantdiaryentity_clear_cache() -> None:
     """Test that the extra_state_attributes cache is cleared."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",
@@ -245,9 +245,9 @@ def test_planttrackerentity_clear_cache() -> None:
     assert "extra_state_attributes" not in entity.__dict__
 
 
-def test_planttrackerentity_parse_int() -> None:
+def test_plantdiaryentity_parse_int() -> None:
     """Test the _parse_int method of the entity."""
-    entity = PlantTrackerEntity(
+    entity = PlantDiaryEntity(
         "test_plant",
         {
             "plant_name": "Test Plant",

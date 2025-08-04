@@ -1,22 +1,71 @@
-"""Tests for Plant Tracker integration."""
+"""Tests for Plant Diary integration."""
 
 import pytest
-from custom_components.plant_tracker import config_flow
-from custom_components.plant_tracker import async_reload_entry
+import pathlib
+import types
+
+from config.custom_components.plant_diary import config_flow
+from config.custom_components.plant_diary import async_reload_entry
 from unittest import mock
 from unittest.mock import MagicMock, patch, ANY, AsyncMock
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant import config_entries
+from homeassistant.loader import Integration
 
-DEFAULT_NAME = "My Plant Tracker"
+DEFAULT_NAME = "My Plant Diary"
 
 
 @pytest.mark.asyncio
 async def test_flow_user_init(hass) -> None:
     """Test the initialization of the form in the first step of the config flow."""
-    result = await hass.config_entries.flow.async_init(
-        config_flow.DOMAIN, context={"source": "user"}
+
+    # Registramos manualmente el flujo
+    config_entries.HANDLERS[config_flow.DOMAIN] = config_flow.PlantDiaryConfigFlow
+
+    mock_integration = Integration(
+        hass=hass,
+        pkg_path="custom_components.plant_diary",
+        file_path=pathlib.Path("custom_components/plant_diary/__init__.py"),
+        manifest={
+            "domain": config_flow.DOMAIN,
+            "name": "Plant Diary",
+            "version": "1.0.0",
+            "requirements": [],
+            "dependencies": [],
+            "after_dependencies": [],
+            "is_built_in": False,
+        },
+        top_level_files={
+            "custom_components/plant_diary/manifest.json",
+            "custom_components/plant_diary/config_flow.py",
+            "custom_components/plant_diary/const.py",
+            "custom_components/plant_diary/PlantDiaryEntity.py",
+            "custom_components/plant_diary/PlantDiaryManager.py ",
+            "custom_components/plant_diary/services.yaml",
+        },
     )
+
+    mock_config_flow_module = types.SimpleNamespace()
+    mock_config_flow_module.PlantDiaryConfigFlow = config_flow.PlantDiaryConfigFlow
+    mock_integration.async_get_platform = mock.AsyncMock(
+        return_value=mock_config_flow_module
+    )
+
+    with (
+        mock.patch(
+            "homeassistant.loader.async_get_integration",
+            return_value=mock_integration,
+        ),
+        mock.patch(
+            "homeassistant.loader.async_get_integrations",
+            return_value={config_flow.DOMAIN: mock_integration},
+        ),
+    ):
+        result = await hass.config_entries.flow.async_init(
+            config_flow.DOMAIN, context={"source": "user"}
+        )
+
     expected = {
         "context": {"source": "user"},
         "data": {},
@@ -26,11 +75,11 @@ async def test_flow_user_init(hass) -> None:
         "options": {},
         "result": mock.ANY,
         "subentries": (),
-        "title": "Plant Tracker",
+        "title": "Plant Diary",
         "type": mock.ANY,
         "version": 1,
         "description_placeholders": None,
-        "handler": "plant_tracker",
+        "handler": "plant_diary",
     }
     assert expected == result
 
@@ -42,10 +91,12 @@ async def test_async_reload_entry():
 
     with (
         patch(
-            "custom_components.plant_tracker.async_unload_entry", new_callable=AsyncMock
+            "config.custom_components.plant_diary.async_unload_entry",
+            new_callable=AsyncMock,
         ) as mock_unload,
         patch(
-            "custom_components.plant_tracker.async_setup_entry", new_callable=AsyncMock
+            "config.custom_components.plant_diary.async_setup_entry",
+            new_callable=AsyncMock,
         ) as mock_setup,
     ):
         await async_reload_entry(hass, entry)

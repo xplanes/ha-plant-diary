@@ -1,0 +1,12 @@
+{
+  "codeowners": ["@xplanes"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/xplanes/ha-plant-diary",
+  "domain": "plant_diary",
+  "iot_class": "calculated",
+  "name": "Plant Diary",
+  "requirements": [],
+  "version": "1.0.0",
+  "issue_tracker": "https://github.com/xplanes/ha-plant-diary/issues"
+}

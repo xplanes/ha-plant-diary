@@ -1,4 +1,4 @@
-class PlantTrackerCard extends HTMLElement {
+class PlantDiaryCard extends HTMLElement {
 
     config;
     content;
@@ -16,7 +16,7 @@ class PlantTrackerCard extends HTMLElement {
         if (!this.innerHTML) {
             // Create the card
             this.innerHTML = `
-                <ha-card header="Plant Tracker">` +
+                <ha-card header="Plant Diary">` +
                 this.getStyles() +
                 `   <div class="card-actions">
                         <mwc-button id="addPlantButton" label="Add Plant"></mwc-button>
@@ -50,7 +50,7 @@ class PlantTrackerCard extends HTMLElement {
             };
 
             // Call the service to update the days since watered
-            this._hass.callService('plant_tracker', 'update_days_since_watered');
+            this._hass.callService('plant_diary', 'update_days_since_watered');
         }
 
         // Set the inner HTML of the content div to the generated HTML
@@ -58,7 +58,7 @@ class PlantTrackerCard extends HTMLElement {
         this.contentPlantsInside.innerHTML = this.generatePlantCardContentHTML(true);
 
         // Add event listener to the plant card
-        this.querySelectorAll('.plant-tracker-entity').forEach((el) => {
+        this.querySelectorAll('.plant-diary-entity').forEach((el) => {
             el.addEventListener('click', (event) => {
                 this._fireEvent('haptic', 'light');
                 const entityId = el.dataset.entityId;
@@ -95,7 +95,7 @@ class PlantTrackerCard extends HTMLElement {
 
                     // Verificar si ya existe un nombre de planta con ese valor
                     const existingNames = Object.values(this._hass.states)
-                        .filter(entity => entity.entity_id.startsWith("sensor.plant_tracker"))
+                        .filter(entity => entity.entity_id.startsWith("sensor.plant_diary"))
                         .map(entity => entity.attributes.plant_name?.toLowerCase());
                     const normalizedExisting = existingNames.map(n => this.normalizeName(n));
 
@@ -107,7 +107,7 @@ class PlantTrackerCard extends HTMLElement {
                     }
 
                     // Call the service to add a new plant
-                    this._hass.callService('plant_tracker', 'create_plant', {
+                    this._hass.callService('plant_diary', 'create_plant', {
                         plant_name: plantNameInput,
                         last_watered: this.modalEditPlantBody.querySelector('#last_watered').value,
                         last_fertilized: this.modalEditPlantBody.querySelector('#last_fertilized').value,
@@ -143,7 +143,7 @@ class PlantTrackerCard extends HTMLElement {
 
                     const name = attributes.plant_name || 'Unknown';
                     if (confirm(`Are you sure you want to delete ${name}?`)) {
-                        this._hass.callService('plant_tracker', 'delete_plant', {
+                        this._hass.callService('plant_diary', 'delete_plant', {
                             plant_id: name
                         });
                         this.modalEditPlant.style.display = "none"; // Close the modal after deletion
@@ -211,7 +211,7 @@ class PlantTrackerCard extends HTMLElement {
             const plantId = this._hass.states[entityId]?.attributes?.plant_name;
 
             // Call the service to update the attributes
-            this._hass.callService('plant_tracker', 'update_plant', {
+            this._hass.callService('plant_diary', 'update_plant', {
                 plant_id: plantId,
                 plant_name: plantId,
                 last_watered: form.last_watered.value,
@@ -256,7 +256,7 @@ class PlantTrackerCard extends HTMLElement {
     getImageUrl(entityId) {
         const state = this._hass.states[entityId];
         const attributes = state ? state.attributes : {};
-        const imageUrl = `/local/plant_tracker/${attributes.image || 'default_image'}.jpg`;
+        const imageUrl = `/local/plant_diary/${attributes.image || 'default_image'}.jpg`;
         return imageUrl;
     }
 
@@ -334,7 +334,7 @@ class PlantTrackerCard extends HTMLElement {
         content += `<div id="error_message" class="error-message"></div>`;
 
         // Add the content for the modal
-        content += '<div class="plant-tracker-entity-modal-content">';
+        content += '<div class="plant-diary-entity-modal-content">';
 
         // Add the plant image
         content += this.generatePlantImageContainerHTML(entityId);
@@ -413,7 +413,7 @@ class PlantTrackerCard extends HTMLElement {
 
     generatePlantCardContentHTML(isInside) {
 
-        // generate the plant tracker card content
+        // generate the plant diary card content
         let htmlContent = '';
 
         if (isInside) {
@@ -424,8 +424,8 @@ class PlantTrackerCard extends HTMLElement {
 
         const showOnlyDue = this.querySelector('#toggleShowDue')?.checked;
         for (const entityId in this._hass.states) {
-            // Check if the entity ID starts with 'plant_tracker.'
-            if (entityId.startsWith('sensor.plant_tracker')) {
+            // Check if the entity ID starts with 'plant_diary.'
+            if (entityId.startsWith('sensor.plant_diary')) {
                 const state = this._hass.states[entityId];
                 const stateStr = state ? state.state : 'unavailable';
                 const attributes = state ? state.attributes : {};
@@ -441,7 +441,7 @@ class PlantTrackerCard extends HTMLElement {
                     // Create the HTML content for each entity
                     // Use the entity ID as the key to access the state and attributes
                     htmlContent += `
-                        <div class="plant-tracker-entity" style="background-color: ${backgroundColor};" data-entity-id="${entityId}">
+                        <div class="plant-diary-entity" style="background-color: ${backgroundColor};" data-entity-id="${entityId}">
                     `;
                     htmlContent += this.generatePlantImageContainerHTML(entityId);
                     htmlContent += `
@@ -485,7 +485,7 @@ class PlantTrackerCard extends HTMLElement {
                 display: flex;
                 flex-direction: column;
             }
-            .plant-tracker-entity {
+            .plant-diary-entity {
                 display: grid;
                 grid-template-areas:
                     "i n delete_btn"
@@ -510,7 +510,7 @@ class PlantTrackerCard extends HTMLElement {
                 box-sizing: border-box;
                 cursor: pointer;
             }
-            .plant-tracker-entity .plant-image-container {
+            .plant-diary-entity .plant-image-container {
                 grid-area: i;
                 display: flex;
                 align-items: center;        /* vertical */
@@ -521,7 +521,7 @@ class PlantTrackerCard extends HTMLElement {
                 border-radius: 8px;
                 margin: 0px 0px;
             }
-            .plant-tracker-entity .plant-image {
+            .plant-diary-entity .plant-image {
                 max-height: 100px;          /* Set a max height */
                 max-width: 100%;            /* Prevent overflow */
                 height: auto;               /* Maintain aspect ratio */
@@ -530,30 +530,30 @@ class PlantTrackerCard extends HTMLElement {
                 display: block;
                 border-radius: 8px;
             }
-            .plant-tracker-entity .name {
+            .plant-diary-entity .name {
                 grid-area: n;
                 font-size: 120%;
                 margin: 0px 0px 5px 10px;
                 justify-self: start;
             }
-            .plant-tracker-entity .last_watered,
-            .plant-tracker-entity .due,
-            .plant-tracker-entity .watering_postponed,
-            .plant-tracker-entity .last_fertilized {
+            .plant-diary-entity .last_watered,
+            .plant-diary-entity .due,
+            .plant-diary-entity .watering_postponed,
+            .plant-diary-entity .last_fertilized {
                 font-size: 90%;
                 margin: 0px 0px 0px 10px;
                 line-height: 1.2;
             }
-            .plant-tracker-entity .last_watered {
+            .plant-diary-entity .last_watered {
                 grid-area: last_watered;
             }
-            .plant-tracker-entity .due {
+            .plant-diary-entity .due {
                 grid-area: due;
             }
-            .plant-tracker-entity .watering_postponed {
+            .plant-diary-entity .watering_postponed {
                 grid-area: watering_postponed;
             }
-            .plant-tracker-entity .last_fertilized {
+            .plant-diary-entity .last_fertilized {
                 grid-area: last_fertilized;
             }
 
@@ -669,7 +669,7 @@ class PlantTrackerCard extends HTMLElement {
                 text-align: center;
             }
 
-            .plant-tracker-entity-modal-content {
+            .plant-diary-entity-modal-content {
                 grid-area: content;
                 display: grid;
                 grid-template-areas:
@@ -695,7 +695,7 @@ class PlantTrackerCard extends HTMLElement {
                 box-sizing: border-box;
                 flex-grow: 2;
             }
-            .plant-tracker-entity-modal-content .plant-image-container {
+            .plant-diary-entity-modal-content .plant-image-container {
                 grid-area: i;
                 max-width: 200px;
                 max-height: 200px;
@@ -703,31 +703,31 @@ class PlantTrackerCard extends HTMLElement {
                 margin-top: 10px;
                 justify-self: center;
             }
-            .plant-tracker-entity-modal-content .plant-image {
+            .plant-diary-entity-modal-content .plant-image {
                 width: 100%;
                 height: 100%;
                 display: block;
                 border-radius: 8px;
             }
-            .plant-tracker-entity-modal-content .editForm {
+            .plant-diary-entity-modal-content .editForm {
                 padding: 10px 10px 0px 10px;
             }
-            .plant-tracker-entity-modal-content .plant_name {
+            .plant-diary-entity-modal-content .plant_name {
                 grid-area: plant_name;
             }
-            .plant-tracker-entity-modal-content .last_watered {
+            .plant-diary-entity-modal-content .last_watered {
                 grid-area: last_watered;
             }
-            .plant-tracker-entity-modal-content .watering_days {
+            .plant-diary-entity-modal-content .watering_days {
                 grid-area: watering_days;
             }
-            .plant-tracker-entity-modal-content .watering_postponed {
+            .plant-diary-entity-modal-content .watering_postponed {
                 grid-area: watering_postponed;
             }
-            .plant-tracker-entity-modal-content .last_fertilized {
+            .plant-diary-entity-modal-content .last_fertilized {
                 grid-area: last_fertilized;
             }
-            .plant-tracker-entity-modal-content .inside {
+            .plant-diary-entity-modal-content .inside {
                 grid-area: inside;
                 justify-self: center;
             }
@@ -735,4 +735,4 @@ class PlantTrackerCard extends HTMLElement {
     }
 }
 
-customElements.define('plant-tracker-card', PlantTrackerCard);
+customElements.define('plant-diary-card', PlantDiaryCard);
