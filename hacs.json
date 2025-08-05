@@ -1,4 +1,18 @@
 {
   "name": "Plant Diary",
-  "render_readme": true
+  "render_readme": true,
+  "render_introduction": true,
+  "render_changelog": true,
+  "render_issues": true,
+  "render_license": true,
+  "render_codeowners": true,
+  "render_contributing": true,
+  "render_support": true,
+  "content_in_root": true,
+  "domain": "Plant Diary",
+  "homeassistant": "2025.4.4",
+  "version": "1.0.0",
+  "documentation": "https://github.com/xplanes/ha-plant-diary",
+  "iot_class": "local_push",
+  "codeowners": ["@xplanes"]
 }
