@@ -38,7 +38,7 @@ def create_test_hass():
     hass.services.has_service = lambda d, s: s in registered_services.get(d, {})
 
     def add_entities(
-        entities: Iterable[Entity], update_before_add: bool = False
+        entities: Iterable[Entity], _update_before_add: bool = False
     ) -> None:
         """Mock synchronous add_entities (follows the protocol)."""
         for entity in entities:
@@ -117,7 +117,9 @@ async def test_plantdiarymanager_async_init(mock_async_track_time_change) -> Non
 
 @pytest.mark.asyncio
 @patch("config.custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
-async def test_service_handlers_register_and_call(mock_async_track_time_change):
+async def test_service_handlers_register_and_call(_mock_async_track_time_change):
+    """Test registering and calling service handlers."""
+
     hass = create_test_hass()
     manager = PlantDiaryManager(hass, MagicMock())
 

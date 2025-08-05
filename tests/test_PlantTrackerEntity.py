@@ -1,7 +1,9 @@
 # Test cases for PlantDiaryEntity class in the Plant Diary custom component for Home Assistant
+from datetime import date, timedelta
+
 import pytest
+
 from config.custom_components.plant_diary.PlantDiaryEntity import PlantDiaryEntity
-from datetime import date, datetime, timedelta
 
 
 @pytest.mark.asyncio

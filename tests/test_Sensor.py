@@ -1,15 +1,19 @@
-import pytest
+# Test cases for the async_setup_entry function in the Plant Diary custom component for Home Assistant
+from typing import Iterable
 from unittest.mock import AsyncMock, MagicMock
-from homeassistant.core import HomeAssistant
+
+import pytest
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import Entity
+
 from config.custom_components.plant_diary.const import DOMAIN, PLANT_DIARY_MANAGER
 from config.custom_components.plant_diary.sensor import async_setup_entry
-from typing import Iterable
-from homeassistant.helpers.entity import Entity
 
 
 @pytest.mark.asyncio
 async def test_async_setup_entry_calls_restore(caplog):
+    """Test that async_setup_entry calls restore_and_add_entities."""
     hass = MagicMock(spec=HomeAssistant)
     entry = MagicMock(spec=ConfigEntry)
 
