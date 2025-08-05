@@ -1,9 +1,10 @@
 """Module for managing the Plant Diary component."""
 
 import logging
+from datetime import datetime
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.components.logbook import async_log_entry
+from homeassistant.components.logbook import async_log_entry, log_entry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -40,7 +41,6 @@ class PlantDiaryManager:
 
     async def async_register_services(self):
         """Register Home Assistant services for plant management."""
-        hass = self.hass
 
         async def handle_create_plant(call: ServiceCall):
             await self.create_plant(call.data)
@@ -51,15 +51,16 @@ class PlantDiaryManager:
         async def handle_delete_plant(call: ServiceCall):
             await self.delete_plant(call.data["plant_id"])
 
-        async def handle_update_days_since_last_watered(call: ServiceCall):
+        async def handle_update_days_since_last_watered(_call: ServiceCall):
             self.update_all_days_since_last_watered(None)
 
-        hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
-        hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
-        hass.services.async_register(DOMAIN, "delete_plant", handle_delete_plant)
-        hass.services.async_register(
+        self.hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
+        self.hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
+        self.hass.services.async_register(DOMAIN, "delete_plant", handle_delete_plant)
+        self.hass.services.async_register(
             DOMAIN, "update_days_since_watered", handle_update_days_since_last_watered
         )
+
         self._midnight_listener = async_track_time_change(
             self.hass,
             self.update_all_days_since_last_watered,
@@ -185,13 +186,14 @@ class PlantDiaryManager:
         if save_to_config:
             self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
-    def update_all_days_since_last_watered(self, now):
+    def update_all_days_since_last_watered(self, _now: datetime | None = None):
         """Update the days since last watered for all plant entities."""
+
         _LOGGER.debug("update for all plants")
         for entity in self.entities.values():
             entity.update_days_since_last_watered()
 
-        async_log_entry(
+        log_entry(
             self.hass,
             name="Plant Diary",
             message="Updated days since last watered for all plants",
