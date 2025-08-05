@@ -170,6 +170,7 @@ class PlantDiaryCard extends HTMLElement {
                 .addEventListener('click', () => {
                     this._fireEvent('haptic', 'light');
                     this.modalEditPlantBody.querySelector('#last_watered').value = this.getTodayDate();
+                    this.modalEditPlantBody.querySelector('#watering_postponed').value = 0;
                 });
             this.modalEditPlantBody.querySelector('#last_fertilized_btn')
                 .addEventListener('click', () => {
