@@ -1,4 +1,15 @@
 {
   "version": "2.0.0",
-  "tasks": []
+  "tasks": [
+    {
+      "label": "Deploy plant-diary",
+      "type": "shell",
+      "command": "sh",
+      "args": [
+        "-c",
+        "mkdir -p /workspaces/core/config/www/plant_diary && cp -r /workspaces/plant-diary/www/plant_diary /workspaces/core/config/www && mkdir -p /workspaces/core/config/custom_components/plant_diary && cp -r /workspaces/plant-diary/custom_components/plant_diary /workspaces/core/config/custom_components"],
+      "group": "build",
+      "detail": "Deploy plant-diary to core configuration",
+    }
+  ]
 }
