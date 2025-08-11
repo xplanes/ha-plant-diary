@@ -19,7 +19,7 @@ class PlantDiaryCard extends HTMLElement {
                 <ha-card header="Plant Diary">` +
                 this.getStyles() +
                 `   <div class="card-actions">
-                        <mwc-button id="addPlantButton" label="Add Plant"></mwc-button>
+                        <ha-button id="addPlantButton">Add Plant</ha-button>
                     </div>
                     <div class="filter-toggle">
                         <label for="toggleShowDue">Show only plants that need watering</label>
@@ -397,7 +397,7 @@ class PlantDiaryCard extends HTMLElement {
             `
         content += `
             <div class="modal-buttons">
-                <mwc-button id="cancel_button" label="Cancel"></mwc-button>
+                <ha-button id="cancel_button">Cancel</ha-button>
                 `
         if (entityId !== "") {
             content += `
@@ -405,7 +405,7 @@ class PlantDiaryCard extends HTMLElement {
         }
 
         content += `
-                <mwc-button id="ok_button" label="OK"></mwc-button>
+                <ha-button id="ok_button">OK</ha-button>
             </div>
         </div>`
 
