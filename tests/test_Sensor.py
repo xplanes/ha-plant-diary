@@ -7,8 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 
-from config.custom_components.plant_diary.const import DOMAIN, PLANT_DIARY_MANAGER
-from config.custom_components.plant_diary.sensor import async_setup_entry
+from custom_components.plant_diary.const import DOMAIN, PLANT_DIARY_MANAGER
+from custom_components.plant_diary.sensor import async_setup_entry
 
 
 @pytest.mark.asyncio

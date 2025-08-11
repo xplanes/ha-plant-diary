@@ -11,7 +11,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import Integration
 
-from config.custom_components.plant_diary import async_reload_entry, config_flow
+from custom_components.plant_diary import (
+    async_reload_entry,
+    config_flow,
+    async_unload_entry,
+)
 
 DEFAULT_NAME = "My Plant Diary"
 
@@ -83,6 +87,8 @@ async def test_flow_user_init(hass) -> None:
     }
     assert expected == result
 
+    await hass.config_entries.async_unload(result["result"].entry_id)
+
 
 @pytest.mark.asyncio
 async def test_async_reload_entry():
@@ -91,11 +97,11 @@ async def test_async_reload_entry():
 
     with (
         patch(
-            "config.custom_components.plant_diary.async_unload_entry",
+            "custom_components.plant_diary.async_unload_entry",
             new_callable=AsyncMock,
         ) as mock_unload,
         patch(
-            "config.custom_components.plant_diary.async_setup_entry",
+            "custom_components.plant_diary.async_setup_entry",
             new_callable=AsyncMock,
         ) as mock_setup,
     ):

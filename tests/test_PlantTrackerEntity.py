@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from config.custom_components.plant_diary.PlantDiaryEntity import PlantDiaryEntity
+from custom_components.plant_diary.PlantDiaryEntity import PlantDiaryEntity
 
 
 @pytest.mark.asyncio

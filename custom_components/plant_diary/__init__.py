@@ -5,6 +5,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.loader import IntegrationNotLoaded
 
 from .const import DOMAIN, PLANT_DIARY_MANAGER
 from .PlantDiaryManager import PlantDiaryManager
@@ -42,19 +43,21 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload the plant diary manager and its entities."""
 
     # Unload the platforms (e.g., sensor)
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    try:
+        await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    except IntegrationNotLoaded:
+        pass
 
-    if unload_ok:
-        # Cleanup manager
-        manager: PlantDiaryManager = hass.data[DOMAIN].pop(PLANT_DIARY_MANAGER, None)
-        if manager:
-            await manager.async_unload()
+    # Cleanup manager
+    manager: PlantDiaryManager = hass.data[DOMAIN].pop(PLANT_DIARY_MANAGER, None)
+    if manager:
+        await manager.async_unload()
 
-        # Optionally remove the domain if empty
-        if not hass.data[DOMAIN]:
-            hass.data.pop(DOMAIN)
+    # Optionally remove the domain if empty
+    if not hass.data[DOMAIN]:
+        hass.data.pop(DOMAIN)
 
-    return unload_ok
+    return True
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry):

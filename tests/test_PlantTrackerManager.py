@@ -7,8 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity import Entity
 
-from config.custom_components.plant_diary.const import DOMAIN
-from config.custom_components.plant_diary.PlantDiaryManager import PlantDiaryManager
+from custom_components.plant_diary.const import DOMAIN
+from custom_components.plant_diary.PlantDiaryManager import PlantDiaryManager
 
 
 def create_test_hass():
@@ -67,7 +67,7 @@ def test_plantdiarymanager_initialization() -> None:
 
 
 @pytest.mark.asyncio
-@patch("config.custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
+@patch("custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
 async def test_plantdiarymanager_async_init(mock_async_track_time_change) -> None:
     """Test the async initialization of the manager."""
     hass = MagicMock(spec=HomeAssistant)
@@ -116,7 +116,7 @@ async def test_plantdiarymanager_async_init(mock_async_track_time_change) -> Non
 
 
 @pytest.mark.asyncio
-@patch("config.custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
+@patch("custom_components.plant_diary.PlantDiaryManager.async_track_time_change")
 async def test_service_handlers_register_and_call(_mock_async_track_time_change):
     """Test registering and calling service handlers."""
 
