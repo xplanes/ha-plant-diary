@@ -9,19 +9,18 @@ update_plant:
       example: "My Plant"
       selector:
         text:
-          max_length: 100
     last_watered:
       name: Last Watered
       description: Last time the plant was watered
       required: false
       selector:
-        datetime:
+        datetime: {}
     last_fertilized:
       name: Last Fertilized
       description: Last time the plant was fertilized
       required: false
       selector:
-        datetime:
+        datetime: {}
     watering_interval:
       name: Watering Interval
       description: The interval between watering
@@ -54,19 +53,18 @@ create_plant:
       example: "My Plant"
       selector:
         text:
-          max_length: 100
     last_watered:
       name: Last Watered
       description: Last time the plant was watered
       required: false
       selector:
-        datetime:
+        datetime: {}
     last_fertilized:
       name: Last Fertilized
       description: Last time the plant was fertilized
       required: false
       selector:
-        datetime:
+        datetime: {}
     watering_interval:
       name: Watering Interval
       description: The interval between watering
@@ -102,4 +100,3 @@ delete_plant:
       example: "My Plant"
       selector:
         text:
-          max_length: 100
