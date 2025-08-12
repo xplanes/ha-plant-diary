@@ -52,7 +52,7 @@ class PlantDiaryManager:
             await self.delete_plant(call.data["plant_id"])
 
         async def handle_update_days_since_last_watered(_call: ServiceCall):
-            self.update_all_days_since_last_watered(None)
+            await self.async_handle_update_days_since_last_watered()
 
         self.hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         self.hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
@@ -200,6 +200,10 @@ class PlantDiaryManager:
             domain=DOMAIN,
             entity_id=None,  # No specific entity ID for this log entry
         )
+
+    async def async_handle_update_days_since_last_watered(self):
+        """Async service handler wrapper for sync function."""
+        await self.hass.async_add_executor_job(self.update_all_days_since_last_watered)
 
     async def async_unload(self):
         """Unload the manager and remove all entities."""

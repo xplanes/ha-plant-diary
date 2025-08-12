@@ -3,6 +3,8 @@ from typing import Iterable
 from unittest.mock import ANY, AsyncMock, MagicMock, patch, Mock
 
 import pytest
+import asyncio
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity import Entity
@@ -14,10 +16,11 @@ from custom_components.plant_diary.PlantDiaryManager import PlantDiaryManager
 def create_test_hass():
     """Create a reusable Home Assistant instance with minimal mocks."""
     hass = MagicMock(spec=HomeAssistant)
-    hass.async_create_task = AsyncMock()
+
     hass._added_entities = []
     hass.bus = MagicMock()
-    hass.bus.async_fire = AsyncMock()
+    hass.bus.async_fire = MagicMock(return_value=None)
+    hass.async_add_executor_job = AsyncMock()
 
     # Dictionary to store registered service handlers
     registered_services = {}
@@ -37,6 +40,12 @@ def create_test_hass():
     hass.services.async_call = async_call
     hass.services.has_service = lambda d, s: s in registered_services.get(d, {})
 
+    def async_create_task(coro, *args, **kwargs):
+        task = asyncio.create_task(coro)
+        return task
+
+    hass.async_create_task = async_create_task
+
     def add_entities(
         entities: Iterable[Entity], _update_before_add: bool = False
     ) -> None:
@@ -46,6 +55,7 @@ def create_test_hass():
             hass._added_entities.append(entity)
             # async_added_to_hass must be scheduled manually
             if hasattr(entity, "async_added_to_hass"):
+                print("async_added_to_hass")
                 hass.async_create_task(entity.async_added_to_hass())
 
     hass.async_add_entities = add_entities
@@ -128,6 +138,7 @@ async def test_service_handlers_register_and_call(_mock_async_track_time_change)
     manager.update_plant = AsyncMock()
     manager.delete_plant = AsyncMock()
     manager.update_all_days_since_last_watered = AsyncMock()
+    manager.async_handle_update_days_since_last_watered = AsyncMock()
 
     # Patch async_track_time_change to avoid lingering timers
     with patch("homeassistant.helpers.event.async_track_time_change"):
@@ -164,7 +175,7 @@ async def test_service_handlers_register_and_call(_mock_async_track_time_change)
         {},
         blocking=True,
     )
-    manager.update_all_days_since_last_watered.assert_called_once()
+    manager.async_handle_update_days_since_last_watered.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -187,6 +198,7 @@ async def test_plantdiarymanager_restore_and_add_entities() -> None:
     }
     manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
+    await asyncio.sleep(1)  # Let the event loop run the async_added_to_hass task
 
     assert manager._async_add_entities is not None
     assert len(manager.entities) == 1

@@ -10,11 +10,11 @@ from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import Integration
+from homeassistant.setup import async_setup_component
 
 from custom_components.plant_diary import (
     async_reload_entry,
     config_flow,
-    async_unload_entry,
 )
 
 DEFAULT_NAME = "My Plant Diary"
@@ -55,6 +55,9 @@ async def test_flow_user_init(hass) -> None:
     mock_integration.async_get_platform = mock.AsyncMock(
         return_value=mock_config_flow_module
     )
+
+    # Carga componentes necesarios (sensor, etc)
+    assert await async_setup_component(hass, "sensor", {})
 
     with (
         mock.patch(
