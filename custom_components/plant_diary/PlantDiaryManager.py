@@ -9,7 +9,6 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_change
-from homeassistant.util.dt import now
 
 from .const import DOMAIN
 from .PlantDiaryEntity import PlantDiaryEntity
