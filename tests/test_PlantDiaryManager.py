@@ -8,9 +8,13 @@ import asyncio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity import Entity
+from homeassistant.util.hass_dict import HassKey
+from homeassistant.helpers.entity_values import EntityValues
 
 from custom_components.plant_diary.const import DOMAIN
 from custom_components.plant_diary.PlantDiaryManager import PlantDiaryManager
+
+DATA_CUSTOMIZE: HassKey[EntityValues] = HassKey("hass_customize")
 
 
 def create_test_hass():
@@ -21,6 +25,9 @@ def create_test_hass():
     hass.bus = MagicMock()
     hass.bus.async_fire = MagicMock(return_value=None)
     hass.async_add_executor_job = AsyncMock()
+    hass.data = {}
+    hass.data[DATA_CUSTOMIZE] = {}
+    hass.states = MagicMock()
 
     # Dictionary to store registered service handlers
     registered_services = {}
@@ -52,6 +59,7 @@ def create_test_hass():
         """Mock synchronous add_entities (follows the protocol)."""
         for entity in entities:
             entity.hass = hass
+            entity.entity_id = f"{DOMAIN}.{entity.name}"
             hass._added_entities.append(entity)
             # async_added_to_hass must be scheduled manually
             if hasattr(entity, "async_added_to_hass"):
@@ -116,10 +124,10 @@ async def test_plantdiarymanager_async_init(mock_async_track_time_change) -> Non
     assert manager._midnight_listener is not None
     mock_async_track_time_change.assert_called_once_with(
         hass,
-        manager.update_all_days_since_last_watered,
+        manager.async_update_all_days_since_last_watered,
         hour=0,
         minute=0,
-        second=0,
+        second=1,
     )
 
     assert manager._midnight_listener == mock_async_track_time_change.return_value
@@ -137,8 +145,7 @@ async def test_service_handlers_register_and_call(_mock_async_track_time_change)
     manager.create_plant = AsyncMock()
     manager.update_plant = AsyncMock()
     manager.delete_plant = AsyncMock()
-    manager.update_all_days_since_last_watered = AsyncMock()
-    manager.async_handle_update_days_since_last_watered = AsyncMock()
+    manager.async_update_all_days_since_last_watered = AsyncMock()
 
     # Patch async_track_time_change to avoid lingering timers
     with patch("homeassistant.helpers.event.async_track_time_change"):
@@ -175,7 +182,7 @@ async def test_service_handlers_register_and_call(_mock_async_track_time_change)
         {},
         blocking=True,
     )
-    manager.async_handle_update_days_since_last_watered.assert_called_once()
+    manager.async_update_all_days_since_last_watered.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -340,7 +347,7 @@ async def test_plantdiarymanager_update_days_since_watered() -> None:
     }
     manager = PlantDiaryManager(hass, entry)
     await manager.restore_and_add_entities(hass.async_add_entities)
-    manager.update_all_days_since_last_watered(None)
+    await manager.async_update_all_days_since_last_watered(None)
     assert manager.entities["Plant to Update"]._days_since_watered > 1
 
 

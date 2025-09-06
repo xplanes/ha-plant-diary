@@ -6,6 +6,7 @@ from typing import Any
 from propcache.api import cached_property
 
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.util.dt import now
 
 from .const import DOMAIN
 
@@ -44,7 +45,7 @@ class PlantDiaryEntity(SensorEntity):
         """Return a unique ID for this entity."""
         return self._unique_id
 
-    @cached_property
+    @property  # type: ignore[override]
     def native_value(self) -> int:
         """Return the state of the sensor."""
         return self._state
@@ -73,10 +74,7 @@ class PlantDiaryEntity(SensorEntity):
         if "image" in data:
             self._image: str = data["image"]
 
-        # Clear cached extra_state_attributes
-        self.__dict__.pop("extra_state_attributes", None)
-
-    @cached_property
+    @property  # type: ignore[override]
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return {
@@ -101,11 +99,10 @@ class PlantDiaryEntity(SensorEntity):
     def update_days_since_last_watered(self) -> None:
         """Calculate and update days since last watered."""
         if self._last_watered is None:
+            self._days_since_watered = 0
             self._state = 0
         else:
-            self._days_since_watered = (
-                datetime.today().date() - self._last_watered
-            ).days
+            self._days_since_watered = (now().date() - self._last_watered).days
 
             if self._days_since_watered == 0:
                 self._state = 3

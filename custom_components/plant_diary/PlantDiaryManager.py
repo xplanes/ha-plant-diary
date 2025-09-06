@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_change
+from homeassistant.util.dt import now
 
 from .const import DOMAIN
 from .PlantDiaryEntity import PlantDiaryEntity
@@ -52,7 +53,7 @@ class PlantDiaryManager:
             await self.delete_plant(call.data["plant_id"])
 
         async def handle_update_days_since_last_watered(_call: ServiceCall):
-            await self.async_handle_update_days_since_last_watered()
+            await self.async_update_all_days_since_last_watered()
 
         self.hass.services.async_register(DOMAIN, "create_plant", handle_create_plant)
         self.hass.services.async_register(DOMAIN, "update_plant", handle_update_plant)
@@ -63,10 +64,10 @@ class PlantDiaryManager:
 
         self._midnight_listener = async_track_time_change(
             self.hass,
-            self.update_all_days_since_last_watered,
+            self.async_update_all_days_since_last_watered,
             hour=0,
             minute=0,
-            second=0,
+            second=1,
         )
 
     async def create_plant(self, data: dict):
@@ -104,14 +105,11 @@ class PlantDiaryManager:
 
         entity.update_from_dict(data)
 
-        # Update the days since last watered
-        await entity.async_update()
-
-        # Guardar en la entrada de configuración
-        self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
-
         # Force update the entity state
-        entity.async_schedule_update_ha_state(True)
+        await entity.async_update_ha_state(True)
+
+        # Store the new state in the configuration
+        self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
         async_log_entry(
             self.hass,
@@ -178,32 +176,36 @@ class PlantDiaryManager:
         if self._async_add_entities:
             self._async_add_entities([entity])
 
-        # Actualizar estado inicial
-        await entity.async_update()
-        entity.async_schedule_update_ha_state(True)
+        # Force update the entity state
+        await entity.async_update_ha_state(True)
 
-        # Guardar en la entrada de configuración si corresponde
+        # Store in the config entry if applicable
         if save_to_config:
             self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
-    def update_all_days_since_last_watered(self, _now: datetime | None = None):
+    async def async_update_all_days_since_last_watered(
+        self, _now: datetime | None = None
+    ):
         """Update the days since last watered for all plant entities."""
 
         _LOGGER.debug("update for all plants")
-        for entity in self.entities.values():
-            entity.update_days_since_last_watered()
+        for plant_id in list(self.entities.keys()):
+            entity = self.entities[plant_id]
+
+            # Force update the entity state and write it to home assistant
+            await entity.async_update_ha_state(True)
+
+            # Store the new state in the configuration
+            self.update_plant_in_config_entry(plant_id, entity.extra_state_attributes)
 
         log_entry(
             self.hass,
             name="Plant Diary",
-            message="Updated days since last watered for all plants",
+            message="Updated days since last watered for all plants: "
+            + str(len(self.entities)),
             domain=DOMAIN,
             entity_id=None,  # No specific entity ID for this log entry
         )
-
-    async def async_handle_update_days_since_last_watered(self):
-        """Async service handler wrapper for sync function."""
-        await self.hass.async_add_executor_job(self.update_all_days_since_last_watered)
 
     async def async_unload(self):
         """Unload the manager and remove all entities."""
