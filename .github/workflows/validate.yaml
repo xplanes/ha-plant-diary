@@ -18,6 +18,9 @@ jobs:
       - name: Debug file tree
         run: ls -R
 
+      - name: Show manifest.json
+        run: cat custom_components/plant_diary/manifest.json
+
       - name: HACS validation
         uses: hacs/action@22.5.0
         with:
