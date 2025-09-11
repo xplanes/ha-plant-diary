@@ -13,9 +13,12 @@ jobs:
   validate-hacs:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v4"
-      - uses: "home-assistant/actions/hassfest@master"
+      # Checkout repo
       - uses: actions/checkout@v3
+      # Validate Home Assistant integration manifest
+      - name: Validate HA manifest
+        uses: home-assistant/actions/hassfest@master
+      # Validate HACS repository
       - name: HACS validation
         uses: hacs/action@main
         with:
