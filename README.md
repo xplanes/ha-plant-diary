@@ -1,23 +1,20 @@
-# 🌿 Plant Diary for Home Assistant
+# 🌿 Plant Diary Integration for Home Assistant
 
-**Plant Diary** is a custom integration and Lovelace card for [Home Assistant](https://www.home-assistant.io/) that helps you manage and monitor your houseplants. Track when each plant was last watered or fertilized, define care intervals, and visualize everything with a custom card.
+**Plant Diary** is a custom integration for [Home Assistant](https://www.home-assistant.io/) that helps you manage and monitor your houseplants. Track when each plant was last watered or fertilized, define care intervals, and visualize everything with a custom card [Plant Diary Card](https://github.com/xplanes/ha-plant-diary-card).
 
 This work has been inspired by [Plant tracker for Home Assistant](https://github.com/mountwebs/ha-plant-tracker).
 
-## Features
+# Features
 
-- **Component**
-  - Track multiple plants with individual settings
-  - Custom watering intervals and postponements
-  - Indoor/outdoor plant designation
-  - Automatic daily updates for watering days
-  - Logbook integration for activity tracking
+- Track multiple plants with individual settings
+- Custom watering intervals and postponements
+- Indoor/outdoor plant designation
+- Automatic daily updates for watering days
+- Logbook integration for activity tracking
 
-# 🌱 Plant Diary Component
+# Installation
 
-## Installation
-
-### Manual Installation
+## Manual Installation
 
 1. Clone or download this repository.
 2. Copy the `plant_diary` folder to your Home Assistant `config/custom_components/` directory: config/custom_components/plant_diary
@@ -25,7 +22,7 @@ This work has been inspired by [Plant tracker for Home Assistant](https://github
 4. Go to **Settings > Devices & Services > Devices > Add Device**.
 5. Search for **Plant Diary** and add it.
 
-## Plant Data Fields
+# Plant Data Fields
 
 | Field                | Description                                      |
 | -------------------- | ------------------------------------------------ |
@@ -37,7 +34,7 @@ This work has been inspired by [Plant tracker for Home Assistant](https://github
 | `inside`             | Whether the plant is indoors (`true` or `false`) |
 | `image`              | Custom image path or entity picture (optional)   |
 
-## Logbook Integration
+# Logbook Integration
 
 Plant Diary logs important events to the Home Assistant logbook. These entries help you keep track of changes made either manually or via automation.
 
@@ -70,7 +67,7 @@ Planned features and improvements for future versions:
 
 Feel free to contribute to the roadmap or suggest new ideas!
 
-## 📄 License
+# 📄 License
 
 This project is licensed under the **MIT License**.
 See the [LICENSE](LICENSE) file for full license text.
