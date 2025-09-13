@@ -14,13 +14,51 @@ This work has been inspired by [Plant tracker for Home Assistant](https://github
 
 # Installation
 
-## Manual Installation
+You can install this component in two ways: via [HACS](https://github.com/hacs/integration) or manually.
 
-1. Clone or download this repository.
-2. Copy the `plant_diary` folder to your Home Assistant `config/custom_components/` directory: config/custom_components/plant_diary
+## Option A: Installing via HACS
+
+### Plant Diary integration
+
+1. Go to the HACS Integration Tab
+2. Search the `Plant Diary` component and click on it.
+3. Click Download button at the bottom of the page. A pop up will be shown informing you that the component will be installed in the folder `/config/custom_components/plant_diary`. Click Download.
+
+### Plant Diary Card
+
+1. Go to the HACS Integration Tab
+2. Search the `Plant Diary Card` component and click on it.
+3. Click Download button at the bottom of the page. A pop up will be shown informing you that the component will be installed in the folder `/config/www/community/ha-plant-diary-card`. Click Download. The JavaScript module will be automatically added to the Dashboard Resources (/hacsfiles/ha-plant-diary-card/ha-plant-diary-card.js).
+
+## Option B: Manual Installation
+
+### Plant Diary integration
+
+1. Clone or download the GitHub repository: [ha-plant-diary](https://github.com/xplanes/ha-plant-diary)
+2. Copy the `custom_components/plant_diary` folder to your Home Assistant `config/custom_components/` directory: config/custom_components/plant_diary
 3. Restart Home Assistant.
-4. Go to **Settings > Devices & Services > Devices > Add Device**.
-5. Search for **Plant Diary** and add it.
+
+### Plant Diary Card
+
+1. Clone or download the GitHub repository: [ha-plant-diary-card](https://github.com/xplanes/ha-plant-diary-card)
+1. Place the file `ha-plant-diary-card.js` in your `config/www/plant_diary` directory: config/www/plant_diary/ha-plant-diary-card.js
+1. Add the resource to your dashboard via **Settings > Dashboards > Resources**:
+
+```yaml
+URL: /local/plant_diary/ha-plant-diary-card.js
+```
+
+# Configuration
+
+### Plant Diary integration
+
+1. Go to **Settings > Devices & Services > Devices > Add Device**.
+2. Search for **Plant Diary** and add it.
+
+### Plant Diary Card
+
+1. Create a Dashboard using the Sidebar layout
+2. Click Add Card and search for `Plant Diary Card`
 
 # Plant Data Fields
 
