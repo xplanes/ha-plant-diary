@@ -41,7 +41,8 @@ You can install this component in two ways: via [HACS](https://github.com/hacs/i
 ### Plant Diary Card
 
 1. Clone or download the GitHub repository: [ha-plant-diary-card](https://github.com/xplanes/ha-plant-diary-card)
-1. Place the file `ha-plant-diary-card.js` in your `config/www/plant_diary` directory: config/www/plant_diary/ha-plant-diary-card.js
+1. Create the `config/www/plant_diary` directory if it does not already exist.
+1. Place the file `ha-plant-diary-card.js` in your `config/www/plant_diary` directory: `config/www/plant_diary/ha-plant-diary-card.js`
 1. Add the resource to your dashboard via **Settings > Dashboards > Resources**:
 
 ```yaml
@@ -55,22 +56,32 @@ URL: /local/plant_diary/ha-plant-diary-card.js
 1. Go to **Settings > Devices & Services > Devices > Add Device**.
 2. Search for **Plant Diary** and add it.
 
+Plant Diary creates one sensor for each plant in the form of `sensor.plant_diary_<name>`. The sensor state indicates the current watering status, and the plant details are available as sensor attributes.
+
 ### Plant Diary Card
 
 1. Create a Dashboard using the Sidebar layout
 2. Click Add Card and search for `Plant Diary Card`
 
+### Plant Images
+
+You can use a picture from the internet or upload your own plant photo. By default, place plant images in the `config/www/plant_diary` folder and use the same name as the plant. For example, for a plant named `Monstera`, place the image at `config/www/plant_diary/Monstera.jpg`.
+
+Home Assistant serves files from `config/www` under `/local`, so this example image is available as `/local/plant_diary/Monstera.jpg`.
+
 # Plant Data Fields
 
-| Field                | Description                                      |
-| -------------------- | ------------------------------------------------ |
-| `plant_name`         | Name of the plant                                |
-| `last_watered`       | Last watered date (e.g., `2025-07-30`)           |
-| `last_fertilized`    | Last fertilized date (optional)                  |
-| `watering_interval`  | Days between waterings (default: `14`)           |
-| `watering_postponed` | Extra days to postpone watering (default: `0`)   |
-| `inside`             | Whether the plant is indoors (`true` or `false`) |
-| `image`              | Custom image path or entity picture (optional)   |
+Plant Diary stores these fields as attributes on each plant sensor.
+
+| Field                | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| `plant_name`         | Name of the plant                                                   |
+| `last_watered`       | Last watered date (e.g., `2025-07-30`)                              |
+| `last_fertilized`    | Last fertilized date (optional)                                     |
+| `watering_interval`  | Days between waterings (default: `14`)                              |
+| `watering_postponed` | Extra days to postpone watering (default: `0`)                      |
+| `inside`             | Whether the plant is indoors (`true` or `false`)                    |
+| `image`              | Custom image path or entity picture, such as `Monstera.jpg`         |
 
 # Logbook Integration
 
