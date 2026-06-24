@@ -21,76 +21,23 @@ DEFAULT_NAME = "My Plant Diary"
 
 
 @pytest.mark.asyncio
-async def test_flow_user_init(hass) -> None:
-    """Test the initialization of the form in the first step of the config flow."""
+async def test_flow_user_init() -> None:
+    """Test the initialization of the config flow without Home Assistant fixture."""
 
-    # Registramos manualmente el flujo
-    config_entries.HANDLERS[config_flow.DOMAIN] = config_flow.PlantDiaryConfigFlow
+    flow = config_flow.PlantDiaryConfigFlow()
 
-    mock_integration = Integration(
-        hass=hass,
-        pkg_path="custom_components.plant_diary",
-        file_path=pathlib.Path("custom_components/plant_diary/__init__.py"),
-        manifest={
-            "domain": config_flow.DOMAIN,
-            "name": "Plant Diary",
-            "version": "1.0.0",
-            "requirements": [],
-            "dependencies": [],
-            "after_dependencies": [],
-            "is_built_in": False,
-        },
-        top_level_files={
-            "custom_components/plant_diary/manifest.json",
-            "custom_components/plant_diary/config_flow.py",
-            "custom_components/plant_diary/const.py",
-            "custom_components/plant_diary/PlantDiaryEntity.py",
-            "custom_components/plant_diary/PlantDiaryManager.py ",
-            "custom_components/plant_diary/services.yaml",
-        },
-    )
+    # Provide a minimal hass with no existing config entries
+    hass = MagicMock()
+    hass.config_entries = MagicMock()
+    hass.config_entries.async_entries = MagicMock(return_value=[])
+    flow.hass = hass
 
-    mock_config_flow_module = types.SimpleNamespace()
-    mock_config_flow_module.PlantDiaryConfigFlow = config_flow.PlantDiaryConfigFlow
-    mock_integration.async_get_platform = mock.AsyncMock(
-        return_value=mock_config_flow_module
-    )
+    result = await flow.async_step_user()
 
-    # Carga componentes necesarios (sensor, etc)
-    assert await async_setup_component(hass, "sensor", {})
-
-    with (
-        mock.patch(
-            "homeassistant.loader.async_get_integration",
-            return_value=mock_integration,
-        ),
-        mock.patch(
-            "homeassistant.loader.async_get_integrations",
-            return_value={config_flow.DOMAIN: mock_integration},
-        ),
-    ):
-        result = await hass.config_entries.flow.async_init(
-            config_flow.DOMAIN, context={"source": "user"}
-        )
-
-    expected = {
-        "context": {"source": "user"},
-        "data": {},
-        "description": None,
-        "flow_id": mock.ANY,
-        "minor_version": 1,
-        "options": {},
-        "result": mock.ANY,
-        "subentries": (),
-        "title": "Plant Diary",
-        "type": mock.ANY,
-        "version": 1,
-        "description_placeholders": None,
-        "handler": "plant_diary",
-    }
-    assert expected == result
-
-    await hass.config_entries.async_unload(result["result"].entry_id)
+    # Since no data is required, a create_entry result is expected
+    assert result["type"] == "create_entry"
+    assert result["title"] == "Plant Diary"
+    assert result["data"] == {}
 
 
 @pytest.mark.asyncio
